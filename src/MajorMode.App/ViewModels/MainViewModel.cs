@@ -468,7 +468,7 @@ public sealed class MainViewModel : ObservableObject
         (State, StateText) = (_isSaving, _analysis.CanRender, _saveOutcome) switch
         {
             (true, _, _) => (ImageState.Saving, "Сохранение…"),
-            (_, false, _) => (ImageState.Invalid, "Есть ошибки: картинка не построена"),
+            (_, false, _) => (ImageState.Invalid, "Есть ошибки в полях"),
             (_, _, ImageState.Saved) => (ImageState.Saved, $"Сохранено: {_savedFileName}"),
             (_, _, ImageState.SaveFailed) => (ImageState.SaveFailed, "Не сохранено: причина в сообщении ниже"),
             _ when _everSaved => (ImageState.Ready, "Изменено, не сохранено"),
