@@ -1,14 +1,28 @@
 namespace MajorMode.Rendering.Export;
 
+public enum GifDither
+{
+    /// <summary>Дизеринг только если без него средняя ошибка палитры заметна (градиенты, текстуры).</summary>
+    Auto,
+    Always,
+    Never,
+}
+
 /// <summary>
 /// Кодер настоящего статического GIF89a (один кадр, глобальная палитра 256 цветов, LZW).
 /// </summary>
 public static class GifEncoder
 {
+    /// <summary>
+    /// Средняя ошибка (сумма |ΔR|+|ΔG|+|ΔB| на пиксель), ниже которой дизеринг не нужен.
+    /// Плоские стили дают ~0.01, градиентный фон дерева ~0.5: на нем без дизеринга видны полосы.
+    /// </summary>
+    public const double AutoDitherThreshold = 0.1;
+
     /// <param name="bgra">Пиксели BGRA построчно (альфа игнорируется, картинка непрозрачная).</param>
     /// <param name="reservedRgb">Цвета 0xRRGGBB, которые должны попасть в палитру точно (маркеры, текст).</param>
-    /// <param name="dither">Floyd–Steinberg для градиентов; на точных цветах палитры шум не появляется.</param>
-    public static void Encode(ReadOnlySpan<byte> bgra, int width, int height, Stream output, IEnumerable<int>? reservedRgb = null, bool dither = true)
+    /// <param name="dither">Floyd–Steinberg для градиентов; на плоских картинках Auto его не включает, чтобы края текста не шумели.</param>
+    public static void Encode(ReadOnlySpan<byte> bgra, int width, int height, Stream output, IEnumerable<int>? reservedRgb = null, GifDither dither = GifDither.Auto)
     {
         if (width is <= 0 or > ushort.MaxValue || height is <= 0 or > ushort.MaxValue)
         {
@@ -21,23 +35,43 @@ public static class GifEncoder
         }
 
         var palette = PaletteQuantizer.BuildPalette(bgra, reservedRgb ?? [], out var exact);
-        var indices = exact || !dither
-            ? MapDirect(bgra, width, height, palette)
-            : MapDithered(bgra, width, height, palette);
+        byte[] indices;
+        if (exact || dither == GifDither.Never)
+        {
+            indices = MapDirect(bgra, width, height, palette, out _);
+        }
+        else if (dither == GifDither.Always)
+        {
+            indices = MapDithered(bgra, width, height, palette);
+        }
+        else
+        {
+            indices = MapDirect(bgra, width, height, palette, out var meanError);
+            if (meanError > AutoDitherThreshold)
+            {
+                indices = MapDithered(bgra, width, height, palette);
+            }
+        }
 
         WriteGif(output, width, height, palette, indices);
     }
 
-    private static byte[] MapDirect(ReadOnlySpan<byte> bgra, int width, int height, int[] palette)
+    private static byte[] MapDirect(ReadOnlySpan<byte> bgra, int width, int height, int[] palette, out double meanError)
     {
         var mapper = new PaletteMapper(palette);
         var result = new byte[width * height];
+        long error = 0;
         for (var i = 0; i < result.Length; i++)
         {
             var o = i * 4;
-            result[i] = mapper.Map(bgra[o + 2], bgra[o + 1], bgra[o]);
+            int r = bgra[o + 2], g = bgra[o + 1], b = bgra[o];
+            var idx = mapper.Map(r, g, b);
+            result[i] = idx;
+            var p = mapper.Color(idx);
+            error += Math.Abs(((p >> 16) & 0xFF) - r) + Math.Abs(((p >> 8) & 0xFF) - g) + Math.Abs((p & 0xFF) - b);
         }
 
+        meanError = result.Length == 0 ? 0 : error / (double)result.Length;
         return result;
     }
 

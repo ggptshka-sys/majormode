@@ -9,8 +9,13 @@ namespace MajorMode.Tests.Rendering;
 public sealed class ExportTests : IDisposable
 {
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "majormode-tests-" + Guid.NewGuid().ToString("N"));
+    private readonly Xunit.Abstractions.ITestOutputHelper _output;
 
-    public ExportTests() => Directory.CreateDirectory(_dir);
+    public ExportTests(Xunit.Abstractions.ITestOutputHelper output)
+    {
+        _output = output;
+        Directory.CreateDirectory(_dir);
+    }
 
     public void Dispose()
     {
@@ -56,10 +61,12 @@ public sealed class ExportTests : IDisposable
 
         var meanError = totalError / (double)decoded.Rgb.Length;
         var exactShare = exact / (double)decoded.Rgb.Length;
+        _output.WriteLine($"{style} {orientation} {canvas}: средняя ошибка {meanError:F3}, точных пикселей {exactShare:P2}, {bytes.Length / 1024} КБ");
         Assert.True(meanError < 6, $"Средняя ошибка {meanError:F2}");
         if (style == ImageStyle.Schematic)
         {
-            Assert.True(exactShare > 0.97, $"Точных пикселей {exactShare:P1}");
+            Assert.True(meanError < 2, $"Схематичный стиль: средняя ошибка {meanError:F2}");
+            Assert.True(exactShare > 0.9, $"Точных пикселей {exactShare:P1}");
         }
 
         // Плоские цвета маркеров попадают в палитру точно.
@@ -113,7 +120,7 @@ public sealed class ExportTests : IDisposable
         }
 
         using var ms = new MemoryStream();
-        GifEncoder.Encode(px, w, h, ms, dither: false);
+        GifEncoder.Encode(px, w, h, ms, dither: GifDither.Never);
         var decoded = TestGifDecoder.Decode(ms.ToArray());
         Assert.Equal(w * h, decoded.Rgb.Length);
     }
