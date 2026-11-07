@@ -12,9 +12,40 @@ Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Drawing, Sy
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 public static class Win32E2E {
     [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
+    public delegate bool EnumProc(IntPtr h, IntPtr l);
     [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc cb, IntPtr l);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll")] static extern IntPtr GetDlgItem(IntPtr dlg, int id);
+    [DllImport("user32.dll")] static extern bool PostMessage(IntPtr h, uint msg, IntPtr w, IntPtr l);
+
+    // Visible standard dialog (#32770) of the process, e.g. a MessageBox.
+    public static IntPtr FindDialog(int processId) {
+        IntPtr found = IntPtr.Zero;
+        EnumWindows((h, l) => {
+            uint pid;
+            GetWindowThreadProcessId(h, out pid);
+            if (pid != processId || !IsWindowVisible(h)) return true;
+            var sb = new StringBuilder(64);
+            GetClassName(h, sb, sb.Capacity);
+            if (sb.ToString() != "#32770") return true;
+            found = h;
+            return false;
+        }, IntPtr.Zero);
+        return found;
+    }
+
+    // WM_COMMAND with IDYES (6): the dialog closes as if "Yes" was pressed.
+    public static bool PressYes(IntPtr dlg) {
+        IntPtr button = GetDlgItem(dlg, 6);
+        if (button == IntPtr.Zero) return false;
+        return PostMessage(dlg, 0x0111, (IntPtr)6, button);
+    }
 }
 "@
 
@@ -84,34 +115,22 @@ try {
     if (-not $button) { throw 'CheckUpdatesButton not found (previous release may predate the updater)' }
     $button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
 
-    # Confirmation message box (#32770); "Yes" has AutomationId 6 (IDYES).
-    $yes = $null
+    # Confirmation message box.
+    $dialog = [IntPtr]::Zero
     $deadline = (Get-Date).AddSeconds(60)
-    $pidCond = New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $old.Id)
-    $yesCond = New-Object System.Windows.Automation.AndCondition(
-        (New-Object System.Windows.Automation.PropertyCondition($A::AutomationIdProperty, '6')),
-        (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)))
-    while (-not $yes -and (Get-Date) -lt $deadline) {
+    while ($dialog -eq [IntPtr]::Zero -and (Get-Date) -lt $deadline) {
         Start-Sleep -Milliseconds 500
-        foreach ($w in $A::RootElement.FindAll($Scope::Children, $pidCond)) {
-            $yes = $w.FindFirst($Scope::Descendants, $yesCond)
-            if ($yes) {
-                Save-Shot ([IntPtr]$w.Current.NativeWindowHandle) 'e2e-01-confirm'
-                break
-            }
-        }
+        $dialog = [Win32E2E]::FindDialog($old.Id)
     }
-    if (-not $yes) {
+    if ($dialog -eq [IntPtr]::Zero) {
         Save-Shot $old.MainWindowHandle 'e2e-failure'
         throw 'Update confirmation dialog did not appear'
     }
-    $invoke = $null
-    if ($yes.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$invoke)) {
-        $invoke.Invoke()
-    } else {
-        # "Yes" is the default button of the dialog.
-        $yes.SetFocus()
-        [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
+    Start-Sleep -Seconds 1
+    Save-Shot $dialog 'e2e-01-confirm'
+    if (-not [Win32E2E]::PressYes($dialog)) {
+        Save-Shot $old.MainWindowHandle 'e2e-failure'
+        throw 'Yes button not found in the confirmation dialog'
     }
 
     if (-not $old.WaitForExit(300000)) {
