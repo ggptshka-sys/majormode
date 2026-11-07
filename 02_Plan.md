@@ -9,6 +9,7 @@
 - [x] 7. README, CHANGELOG, CONTRIBUTING, .gitignore, GitHub Actions
 - [x] 8. Push в GitHub
 - [x] 9. GitHub Actions на Windows: сборка, 146 тестов, образцы, single-file exe — зеленый
+- [x] 9a. Темная тема окна (аудио-софт), авто-переход на системную тему при высокой контрастности; UI smoke-тест со скриншотами в CI
 - [ ] 10. Ручная проверка на Windows: запуск, NVDA, Narrator, высокая контрастность (чеклист в README)
 - [ ] 11. Приемка учителем в REAPER 5 (GIF 1920×1080 и 1080×1920)
 - [ ] Позже: JSON-пресеты (SchemaVersion), выбор лицензии, обновить actions до версий на Node 24

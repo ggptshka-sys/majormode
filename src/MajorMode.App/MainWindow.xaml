@@ -51,9 +51,9 @@
 
         <Grid Margin="16,14,16,6">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="450" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="340" />
+                <ColumnDefinition Width="420" />
+                <ColumnDefinition Width="*" MinWidth="300" />
+                <ColumnDefinition Width="0.55*" MinWidth="220" MaxWidth="380" />
             </Grid.ColumnDefinitions>
 
             <!-- Форма. Порядок элементов = порядок Tab. Карточки (Border) фокус не получают. -->
@@ -302,8 +302,13 @@
             <Border Grid.Column="1" Style="{DynamicResource Card}" Margin="0,0,12,10">
                 <DockPanel>
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                        <TextBlock Text="Превью" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        <Border Style="{DynamicResource Chip}" HorizontalAlignment="Right">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Превью" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+                        <Border Grid.Column="1" Style="{DynamicResource Chip}">
                             <TextBlock Style="{DynamicResource ChipText}" Text="{Binding PreviewCaption}" />
                         </Border>
                     </Grid>
@@ -313,7 +318,7 @@
                                    RenderOptions.BitmapScalingMode="HighQuality"
                                    AutomationProperties.Name="Превью картинки аккорда"
                                    AutomationProperties.HelpText="{Binding Description}" />
-                            <Border Background="#E6101216" Padding="24,18" CornerRadius="10" Margin="24"
+                            <Border Background="#E6101216" Padding="16,12" CornerRadius="10" Margin="12"
                                     VerticalAlignment="Center" HorizontalAlignment="Center"
                                     Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Foreground="White" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="360"
