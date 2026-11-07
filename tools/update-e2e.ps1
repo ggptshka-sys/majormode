@@ -59,7 +59,7 @@ $deadline = (Get-Date).AddMinutes(5)
 do {
     try {
         $latest = (Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest" -UseBasicParsing `
-            -Headers @{ 'User-Agent' = 'MajorMode-e2e' }).tag_name
+            -Headers @{ 'User-Agent' = 'MajorMode-e2e'; 'Accept' = 'application/vnd.github+json' }).tag_name
     } catch { $latest = $null }
     Write-Host "Public API latest: $latest"
     if ($latest -eq "v$ExpectedVersion") { break }

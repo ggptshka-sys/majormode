@@ -48,7 +48,9 @@ public sealed class UpdateService
     {
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.github.com/repos/{Owner}/{Repository}/releases/latest");
+            // CDN GitHub кэширует ответ ~60 с по URL; уникальный параметр дает свежий релиз сразу после публикации.
+            var url = $"https://api.github.com/repos/{Owner}/{Repository}/releases/latest?nocache={DateTime.UtcNow.Ticks}";
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.ParseAdd("application/vnd.github+json");
             using var response = await Http.SendAsync(request, ct);
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
