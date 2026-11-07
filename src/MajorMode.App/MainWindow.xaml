@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:parsing="clr-namespace:MajorMode.Core.Parsing;assembly=MajorMode.Core"
         Title="MajorMode — картинки аккордов"
+        Icon="Assets/majormode.ico"
         Width="1360" Height="900" MinWidth="1000" MinHeight="640"
         FontSize="15" FontFamily="Segoe UI Variable Text, Segoe UI"
         Background="{DynamicResource Brush.Window}"
@@ -14,34 +15,13 @@
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding ChooseFolderCommand}" />
     </Window.InputBindings>
 
-    <!-- Шапка объявлена последней: по Tab кнопка обновлений идет после всех полей формы. -->
+    <!-- Строка состояния объявлена последней: по Tab ссылка обновлений идет после всех полей формы. -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-
-        <!-- Строка состояния: состояние картинки и последнее объявление. NVDA+End / Диктор+End читают ее целиком. -->
-        <StatusBar Grid.Row="2" Focusable="False">
-            <StatusBar.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <DockPanel LastChildFill="True" />
-                </ItemsPanelTemplate>
-            </StatusBar.ItemsPanel>
-            <StatusBarItem DockPanel.Dock="Left">
-                <StackPanel Orientation="Horizontal">
-                    <Ellipse Style="{DynamicResource StateDot}" Width="8" Height="8" Margin="0,0,8,0" />
-                    <TextBlock Text="{Binding StateText}" FontWeight="SemiBold" />
-                </StackPanel>
-            </StatusBarItem>
-            <Separator DockPanel.Dock="Left" Margin="10,2" Background="{DynamicResource Brush.CardBorder}" />
-            <StatusBarItem>
-                <TextBlock x:Name="AnnouncementText" TextWrapping="Wrap"
-                           AutomationProperties.Name="Последнее сообщение"
-                           AutomationProperties.LiveSetting="Polite" />
-            </StatusBarItem>
-        </StatusBar>
 
         <Grid Grid.Row="1" Margin="16,14,16,6">
             <Grid.ColumnDefinitions>
@@ -211,20 +191,20 @@
                         <StackPanel>
                             <GroupBox Header="Ориентация грифа" Style="{DynamicResource InlineGroupBox}">
                                 <Border Style="{DynamicResource SegmentTrack}">
-                                    <StackPanel Orientation="Horizontal"
-                                                KeyboardNavigation.DirectionalNavigation="Cycle"
-                                                KeyboardNavigation.TabNavigation="Once">
-                                        <RadioButton Content="_Вертикально" GroupName="Orientation"
+                                    <UniformGrid Rows="1"
+                                                 KeyboardNavigation.DirectionalNavigation="Cycle"
+                                                 KeyboardNavigation.TabNavigation="Once">
+                                        <RadioButton Content="_Вертикально" GroupName="Orientation" Margin="0,0,2,0"
                                                      IsChecked="{Binding IsVertical}"
                                                      GotKeyboardFocus="RadioButton_GotKeyboardFocus"
                                                      AutomationProperties.Name="Ориентация грифа: вертикально"
                                                      AutomationProperties.HelpText="Слева 6 струна, справа 1. Лады растут сверху вниз. Стрелки переключают ориентацию." />
-                                        <RadioButton Content="_Горизонтально" GroupName="Orientation"
+                                        <RadioButton Content="_Горизонтально" GroupName="Orientation" Margin="2,0,0,0"
                                                      IsChecked="{Binding IsHorizontal}"
                                                      GotKeyboardFocus="RadioButton_GotKeyboardFocus"
                                                      AutomationProperties.Name="Ориентация грифа: горизонтально"
                                                      AutomationProperties.HelpText="Снизу 6 струна, сверху 1. Лады растут слева направо. Стрелки переключают ориентацию." />
-                                    </StackPanel>
+                                    </UniformGrid>
                                 </Border>
                             </GroupBox>
 
@@ -265,14 +245,21 @@
                                      Foreground="{DynamicResource Brush.Text}" />
                             </TextBlock>
 
-                            <Button Content="Выбор _пути…" Command="{Binding ChooseFolderCommand}"
-                                    AutomationProperties.Name="Выбор пути"
-                                    AutomationProperties.HelpText="Открывает системный диалог выбора папки для сохранения. Горячая клавиша Ctrl+O." />
-                            <Label Content="Текущий путь" Target="{Binding ElementName=FolderBox}" Padding="0,0,0,4" />
-                            <TextBox x:Name="FolderBox" Style="{DynamicResource ReadOnlyText}"
-                                     Text="{Binding OutputFolder, Mode=OneWay}"
-                                     AutomationProperties.Name="Текущий путь"
-                                     AutomationProperties.HelpText="Папка, куда сохраняется картинка. Изменить: кнопка Выбор пути." />
+                            <Label Content="Текущий путь" Target="{Binding ElementName=FolderBox}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FolderBox" Style="{DynamicResource ReadOnlyText}"
+                                         Text="{Binding OutputFolder, Mode=OneWay}"
+                                         AutomationProperties.Name="Текущий путь"
+                                         AutomationProperties.HelpText="Папка, куда сохраняется картинка. Изменить: кнопка Выбор пути, она следующая по Tab." />
+                                <Button Grid.Column="1" Content="Выбор _пути…" Command="{Binding ChooseFolderCommand}"
+                                        Margin="8,0,0,4" VerticalAlignment="Top" MinHeight="38"
+                                        AutomationProperties.Name="Выбор пути"
+                                        AutomationProperties.HelpText="Открывает системный диалог выбора папки для сохранения. Горячая клавиша Ctrl+O." />
+                            </Grid>
 
                             <Button x:Name="SaveButton" Content="_Сохранить" Command="{Binding SaveCommand}" Style="{DynamicResource AccentButton}"
                                     AutomationProperties.Name="Сохранить"
@@ -283,11 +270,7 @@
                                      AutomationProperties.Name="Результат сохранения" />
                             <TextBox Style="{DynamicResource ReadOnlyText}" Text="{Binding ErrorSummary, Mode=OneWay}"
                                      Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}"
-                                     AutomationProperties.Name="Сводка ошибок" />
-                            <TextBox Style="{DynamicResource ReadOnlyText}" Text="{Binding WarningSummary, Mode=OneWay}"
-                                     Visibility="{Binding HasWarnings, Converter={StaticResource BoolToVisibility}}"
-                                     AutomationProperties.Name="Предупреждения" />
-                        </StackPanel>
+                                     AutomationProperties.Name="Сводка ошибок" />                        </StackPanel>
                     </Border>
                 </StackPanel>
             </ScrollViewer>
@@ -306,12 +289,6 @@
                             <TextBlock Style="{DynamicResource ChipText}" Text="{Binding PreviewCaption}" />
                         </Border>
                     </Grid>
-                    <Border DockPanel.Dock="Bottom" Style="{DynamicResource StatePill}" Margin="0,10,0,0">
-                        <DockPanel>
-                            <Ellipse Style="{DynamicResource StateDot}" />
-                            <TextBlock Style="{DynamicResource StateText}" Text="{Binding StateText}" />
-                        </DockPanel>
-                    </Border>
                     <Border Style="{DynamicResource PreviewInset}">
                         <Grid>
                             <Image Source="{Binding Preview}" Stretch="Uniform" Margin="10"
@@ -345,31 +322,69 @@
         <Border Grid.Row="0" Background="{DynamicResource Brush.Header}"
                 BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="0,0,0,1" Padding="18,10">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding AppVersionText}" VerticalAlignment="Center" Margin="0,0,14,0"
-                               FontSize="13" Foreground="{DynamicResource Brush.TextMuted}" />
-                    <Button x:Name="CheckUpdatesButton" Content="Проверить о_бновления" Margin="0"
-                            Command="{Binding CheckUpdatesCommand}"
-                            AutomationProperties.Name="Проверить обновления"
-                            AutomationProperties.HelpText="Сверяет версию с последней на GitHub. Если есть новая, спросит подтверждение, скачает ее и перезапустит программу. Alt+Б." />
-                </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource Brush.Field}"
-                            BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="1" VerticalAlignment="Center">
-                        <UniformGrid Rows="2" Columns="2" Margin="8">
-                            <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger1}" />
-                            <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger2}" />
-                            <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger3}" />
-                            <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger4}" />
-                        </UniformGrid>
-                    </Border>
-                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="MajorMode" FontSize="18" FontWeight="Bold" />
-                        <TextBlock Text="Картинки гитарных аккордов для видео" FontSize="12"
-                                   Foreground="{DynamicResource Brush.TextMuted}" />
-                    </StackPanel>
+                    <!-- Логотип: контуры из Assets/majormode.svg. -->
+                    <Viewbox Width="40" Height="40" VerticalAlignment="Center">
+                        <Canvas Width="1024" Height="1024">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform X="-512" Y="-506" />
+                                    <ScaleTransform ScaleX="1.0933333333" ScaleY="1.0933333333" />
+                                    <TranslateTransform X="512" Y="512" />
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+                            <Path Fill="#38CCC0"
+                                  Data="M512 131 C354 131 258 171 214 265 C180 337 198 413 227 493 C265 597 322 700 386 782 C438 849 474 881 512 881 C550 881 586 849 638 782 C702 700 759 597 797 493 C826 413 844 337 810 265 C766 171 670 131 512 131 Z" />
+                            <Path Fill="#252726"
+                                  Data="M356 305 H432 L512 474 L592 305 H668 V603 H602 V421 L525 584 H500 L422 421 V603 H356 Z" />
+                        </Canvas>
+                    </Viewbox>
+                    <TextBlock Text="MajorMode" FontSize="18" FontWeight="Bold" Margin="6,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
             </DockPanel>
         </Border>
+
+        <!-- Строка состояния: состояние картинки, последнее объявление, версия и обновления.
+             NVDA+End / Диктор+End читают ее целиком. -->
+        <StatusBar Grid.Row="2" Focusable="False">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel LastChildFill="True" />
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem DockPanel.Dock="Left" Focusable="False">
+                <Button x:Name="ShareButton" Style="{DynamicResource LinkButton}"
+                        Command="{Binding ShareCommand}"
+                        AutomationProperties.Name="Поделиться"
+                        AutomationProperties.HelpText="Открывает страницу проекта на GitHub в браузере и копирует ссылку на нее в буфер обмена. Alt+Д.">
+                    <AccessText Text="По_делиться" TextDecorations="Underline" />
+                </Button>
+            </StatusBarItem>
+            <Separator DockPanel.Dock="Left" Margin="10,2" Background="{DynamicResource Brush.CardBorder}" />
+            <StatusBarItem DockPanel.Dock="Left" Focusable="False">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Style="{DynamicResource StateDot}" Width="8" Height="8" Margin="0,0,8,0" />
+                    <TextBlock Text="{Binding StateText}" FontWeight="SemiBold" />
+                </StackPanel>
+            </StatusBarItem>
+            <Separator DockPanel.Dock="Left" Margin="10,2" Background="{DynamicResource Brush.CardBorder}" />
+            <StatusBarItem DockPanel.Dock="Right" Focusable="False">
+                <Button x:Name="CheckUpdatesButton" Style="{DynamicResource LinkButton}"
+                        Command="{Binding CheckUpdatesCommand}"
+                        AutomationProperties.Name="Проверить обновления"
+                        AutomationProperties.HelpText="Сверяет версию с последней на GitHub. Если есть новая, спросит подтверждение, скачает ее и перезапустит программу. Alt+Б.">
+                    <AccessText Text="Проверить о_бновления" TextDecorations="Underline" />
+                </Button>
+            </StatusBarItem>
+            <StatusBarItem DockPanel.Dock="Right" Focusable="False">
+                <TextBlock Text="{Binding AppVersionText}" Foreground="{DynamicResource Brush.TextMuted}" />
+            </StatusBarItem>
+            <Separator DockPanel.Dock="Right" Margin="10,2" Background="{DynamicResource Brush.CardBorder}" />
+            <StatusBarItem Focusable="False">
+                <TextBlock x:Name="AnnouncementText" TextWrapping="Wrap"
+                           AutomationProperties.Name="Последнее сообщение"
+                           AutomationProperties.LiveSetting="Polite" />
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

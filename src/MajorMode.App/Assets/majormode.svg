@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<title>MajorMode</title>
+<desc>Turquoise guitar pick with a charcoal geometric M on a transparent background.</desc>
+<g transform="translate(512 512) scale(1.0933333333) translate(-512 -506)">
+<path fill="#38CCC0" d="M512 131 C354 131 258 171 214 265 C180 337 198 413 227 493 C265 597 322 700 386 782 C438 849 474 881 512 881 C550 881 586 849 638 782 C702 700 759 597 797 493 C826 413 844 337 810 265 C766 171 670 131 512 131 Z"/>
+<path fill="#252726" d="M356 305 H432 L512 474 L592 305 H668 V603 H602 V421 L525 584 H500 L422 421 V603 H356 Z"/>
+</g></svg>

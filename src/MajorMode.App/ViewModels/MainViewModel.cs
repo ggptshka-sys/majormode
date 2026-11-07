@@ -100,6 +100,7 @@ public sealed class MainViewModel : ObservableObject
         ChooseFolderCommand = new RelayCommand(ChooseFolder, () => !IsBusy);
         SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
         CheckUpdatesCommand = new AsyncRelayCommand(CheckUpdatesAsync, () => !IsBusy);
+        ShareCommand = new RelayCommand(Share);
 
         ApplyAnalysis();
         Description = _analysis.Description;
@@ -120,6 +121,8 @@ public sealed class MainViewModel : ObservableObject
     public ICommand SaveCommand { get; }
 
     public ICommand CheckUpdatesCommand { get; }
+
+    public ICommand ShareCommand { get; }
 
     public string AppVersionText => $"Версия {UpdateService.CurrentVersionText}";
 
@@ -354,7 +357,7 @@ public sealed class MainViewModel : ObservableObject
         private set => Set(ref _isBusy, value);
     }
 
-    /// <summary>Состояние картинки для индикатора под превью и в строке состояния.</summary>
+    /// <summary>Состояние картинки для индикатора в строке состояния.</summary>
     public ImageState State
     {
         get => _state;
@@ -623,6 +626,20 @@ public sealed class MainViewModel : ObservableObject
         {
             IsBusy = false;
         }
+    }
+
+    private void Share()
+    {
+        var url = UpdateService.ProjectPage;
+        var copied = _dialogs.CopyToClipboard(url);
+        var opened = _dialogs.OpenInBrowser(url);
+        Report((copied, opened) switch
+        {
+            (true, true) => $"Ссылка на проект скопирована в буфер обмена и открыта в браузере: {url}",
+            (true, false) => $"Ссылка на проект скопирована в буфер обмена: {url}. Браузер открыть не удалось.",
+            (false, true) => $"Страница проекта открыта в браузере: {url}. Скопировать ссылку не удалось.",
+            _ => $"Не удалось скопировать ссылку и открыть браузер. Адрес проекта: {url}",
+        });
     }
 
     /// <summary>Вызывается после перезапуска новой версией.</summary>

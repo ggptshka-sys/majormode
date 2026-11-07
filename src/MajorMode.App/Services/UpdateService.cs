@@ -42,6 +42,8 @@ public sealed class UpdateService
 
     private static string? ExePath => Environment.ProcessPath;
 
+    public static string ProjectPage => $"https://github.com/{Owner}/{Repository}";
+
     public static string ReleasesPage => $"https://github.com/{Owner}/{Repository}/releases";
 
     public async Task<UpdateCheckResult> CheckAsync(CancellationToken ct = default)

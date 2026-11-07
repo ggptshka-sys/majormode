@@ -75,32 +75,6 @@
     </Style>
 
     <!-- Индикатор состояния картинки (StateKey из MainViewModel). Цвет дублирует текст, а не заменяет его. -->
-    <Style x:Key="StatePill" TargetType="Border">
-        <Setter Property="Background" Value="#10302D" />
-        <Setter Property="BorderBrush" Value="#1E5A54" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Padding" Value="12,8" />
-        <Style.Triggers>
-            <DataTrigger Binding="{Binding StateKey}" Value="Invalid">
-                <Setter Property="Background" Value="#33161A" />
-                <Setter Property="BorderBrush" Value="#6B2A30" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding StateKey}" Value="SaveFailed">
-                <Setter Property="Background" Value="#33161A" />
-                <Setter Property="BorderBrush" Value="#6B2A30" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding StateKey}" Value="Saving">
-                <Setter Property="Background" Value="#332A12" />
-                <Setter Property="BorderBrush" Value="#6B5520" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding StateKey}" Value="Saved">
-                <Setter Property="Background" Value="#11301E" />
-                <Setter Property="BorderBrush" Value="#2A6B45" />
-            </DataTrigger>
-        </Style.Triggers>
-    </Style>
-
     <Style x:Key="StateDot" TargetType="Ellipse">
         <Setter Property="Width" Value="10" />
         <Setter Property="Height" Value="10" />
@@ -132,13 +106,6 @@
                 </DataTrigger.ExitActions>
             </DataTrigger>
         </Style.Triggers>
-    </Style>
-
-    <Style x:Key="StateText" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
 
     <!-- Label: стандартный шаблон (access keys работают), меняем только цвет и размер. -->
@@ -284,6 +251,34 @@
         </Setter>
     </Style>
 
+    <!-- Кнопка в виде ссылки (строка состояния). Остается Button: Invoke, access key и порядок Tab те же. -->
+    <Style x:Key="LinkButton" TargetType="Button">
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource StrongFocusVisual}" />
+        <Setter Property="Foreground" Value="{StaticResource Brush.Accent}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="2,0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter RecognizesAccessKey="True" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- RadioButton: сегментный переключатель. Выбранный вариант отличается не только цветом, но и жирным шрифтом. -->
     <Style TargetType="RadioButton">
         <Setter Property="FocusVisualStyle" Value="{DynamicResource StrongFocusVisual}" />
@@ -326,22 +321,24 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="3" />
-        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
 
-    <!-- GroupBox: карточка с цветной полосой и точкой цвета пальца (Tag). Header остается именем группы. -->
+    <!-- GroupBox: карточка, слегка тонированная цветом пальца (Tag), и точка того же цвета. Header остается именем группы. -->
     <Style TargetType="GroupBox">
         <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
         <Setter Property="Margin" Value="0,0,0,10" />
-        <Setter Property="Padding" Value="18,12,16,10" />
+        <Setter Property="Padding" Value="16,12,16,10" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="GroupBox">
                     <Border Background="{StaticResource Brush.Card}" BorderBrush="{StaticResource Brush.CardBorder}"
                             BorderThickness="1" CornerRadius="10" SnapsToDevicePixels="True">
                         <Grid>
-                            <Border x:Name="Stripe" Width="3" HorizontalAlignment="Left" Margin="0,14" CornerRadius="0,2,2,0"
+                            <Border x:Name="Tint" CornerRadius="9" Opacity="0.10"
                                     Background="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Border x:Name="TintFrame" Margin="-1" CornerRadius="10" BorderThickness="1" Opacity="0.55"
+                                    BorderBrush="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" />
                             <StackPanel Margin="{TemplateBinding Padding}">
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
                                     <Ellipse x:Name="Dot" Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center"
@@ -356,7 +353,8 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="Tag" Value="{x:Null}">
                             <Setter TargetName="Dot" Property="Visibility" Value="Collapsed" />
-                            <Setter TargetName="Stripe" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="Tint" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="TintFrame" Property="Visibility" Value="Collapsed" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -406,7 +404,7 @@
         <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
         <Setter Property="Background" Value="{StaticResource Brush.Field}" />
         <Setter Property="BorderBrush" Value="{StaticResource Brush.FieldBorder}" />
-        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="MinHeight" Value="38" />
         <Setter Property="Margin" Value="0,0,0,8" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="SnapsToDevicePixels" Value="True" />

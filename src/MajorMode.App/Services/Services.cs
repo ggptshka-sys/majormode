@@ -1,4 +1,7 @@
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using MajorMode.Core.Settings;
 using Microsoft.Win32;
@@ -18,6 +21,10 @@ public interface IDialogService
     bool ConfirmOverwrite(string fullPath);
 
     bool ConfirmUpdate(string currentVersion, string newVersion);
+
+    bool CopyToClipboard(string text);
+
+    bool OpenInBrowser(string url);
 }
 
 public sealed class WpfDialogService(Func<Window?> owner) : IDialogService
@@ -56,6 +63,32 @@ public sealed class WpfDialogService(Func<Window?> owner) : IDialogService
             ? MessageBox.Show(text, "Обновление MajorMode", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes)
             : MessageBox.Show(w, text, "Обновление MajorMode", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
         return result == MessageBoxResult.Yes;
+    }
+
+    public bool CopyToClipboard(string text)
+    {
+        try
+        {
+            Clipboard.SetText(text);
+            return true;
+        }
+        catch (COMException)
+        {
+            return false;
+        }
+    }
+
+    public bool OpenInBrowser(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
+            return true;
+        }
+        catch (Win32Exception)
+        {
+            return false;
+        }
     }
 }
 

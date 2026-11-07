@@ -7,6 +7,7 @@
     <AssemblyName>MajorMode</AssemblyName>
     <RootNamespace>MajorMode.App</RootNamespace>
     <Title>MajorMode — картинки аккордов</Title>
+    <ApplicationIcon>Assets\majormode.ico</ApplicationIcon>
     <!-- Для single-file публикации нативная библиотека SkiaSharp распаковывается из exe. -->
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
@@ -19,6 +20,10 @@
     </ItemGroup>
     <Delete Files="@(_MajorModePdb)" />
   </Target>
+
+  <ItemGroup>
+    <Resource Include="Assets\majormode.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MajorMode.Core\MajorMode.Core.csproj" />
