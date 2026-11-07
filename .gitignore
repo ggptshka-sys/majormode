@@ -1,0 +1,43 @@
+# Сборка
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+publish/
+*.binlog
+
+# Тесты и покрытие
+TestResults/
+*.trx
+coverage*.xml
+coverage*.json
+
+# Временные экспорты и образцы картинок (генерируются tools/MajorMode.Samples)
+artifacts/
+exports/
+*.tmp
+
+# IDE и пользовательские настройки
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.DotSettings.user
+launchSettings.json
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Секреты и сертификаты
+.env
+.env.*
+*.pfx
+*.snk
+*.p12
+secrets.json

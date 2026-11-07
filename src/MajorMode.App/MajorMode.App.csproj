@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>MajorMode</AssemblyName>
+    <RootNamespace>MajorMode.App</RootNamespace>
+    <Title>MajorMode — картинки аккордов</Title>
+    <!-- Для single-file публикации нативная библиотека SkiaSharp распаковывается из exe. -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MajorMode.Core\MajorMode.Core.csproj" />
+    <ProjectReference Include="..\MajorMode.Rendering\MajorMode.Rendering.csproj" />
+  </ItemGroup>
+
+</Project>

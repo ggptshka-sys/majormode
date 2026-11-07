@@ -1,0 +1,275 @@
+﻿<Window x:Class="MajorMode.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:parsing="clr-namespace:MajorMode.Core.Parsing;assembly=MajorMode.Core"
+        Title="MajorMode — картинки аккордов"
+        Width="1360" Height="900" MinWidth="980" MinHeight="620"
+        FontSize="15"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.InputBindings>
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding ChooseFolderCommand}" />
+    </Window.InputBindings>
+
+    <DockPanel>
+        <!-- Строка состояния: последнее объявление для программы экранного доступа (видно и зрячим). -->
+        <StatusBar DockPanel.Dock="Bottom" Focusable="False">
+            <StatusBarItem>
+                <TextBlock x:Name="AnnouncementText" TextWrapping="Wrap"
+                           AutomationProperties.Name="Последнее сообщение"
+                           AutomationProperties.LiveSetting="Polite" />
+            </StatusBarItem>
+        </StatusBar>
+
+        <Grid Margin="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="430" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="330" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Форма. Порядок элементов = порядок Tab. -->
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          Focusable="False" IsTabStop="False" Padding="0,0,12,0">
+                <StackPanel>
+                    <Label Content="_Название аккорда" Target="{Binding ElementName=ChordNameBox}" />
+                    <TextBox x:Name="ChordNameBox"
+                             Text="{Binding ChordName, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Название аккорда"
+                             AutomationProperties.HelpText="{Binding ChordNameHelp}" />
+
+                    <TextBlock Style="{StaticResource HintText}" Margin="0,6,0,0"
+                               Text="Чтобы пропустить палец, введите 0 в оба поля. Для баррэ первым пальцем введите латинскую B в поле «струна»." />
+
+                    <!-- Палец 1 -->
+                    <GroupBox Header="Палец 1" DataContext="{Binding Fingers[0]}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Label Content="Палец _1: лад" Target="{Binding ElementName=Finger1Fret}" />
+                                    <TextBox x:Name="Finger1Fret" MaxLength="3"
+                                             Text="{Binding Fret, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{Binding FretLabel}"
+                                             AutomationProperties.HelpText="{Binding FretHelp}"
+                                             AutomationProperties.ItemStatus="{Binding FretError}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <Label Content="Струна или B" Target="{Binding ElementName=Finger1String}" />
+                                    <TextBox x:Name="Finger1String" MaxLength="2"
+                                             Text="{Binding GuitarString, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{Binding StringLabel}"
+                                             AutomationProperties.HelpText="{Binding StringHelp}"
+                                             AutomationProperties.ItemStatus="{Binding StringError}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding FretError}" />
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding StringError}" />
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Палец 2 -->
+                    <GroupBox Header="Палец 2" DataContext="{Binding Fingers[1]}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Label Content="Палец _2: лад" Target="{Binding ElementName=Finger2Fret}" />
+                                    <TextBox x:Name="Finger2Fret" MaxLength="3"
+                                             Text="{Binding Fret, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{Binding FretLabel}"
+                                             AutomationProperties.HelpText="{Binding FretHelp}"
+                                             AutomationProperties.ItemStatus="{Binding FretError}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <Label Content="Струна" Target="{Binding ElementName=Finger2String}" />
+                                    <TextBox x:Name="Finger2String" MaxLength="2"
+                                             Text="{Binding GuitarString, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{Binding StringLabel}"
+                                             AutomationProperties.HelpText="{Binding StringHelp}"
+                                             AutomationProperties.ItemStatus="{Binding StringError}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding FretError}" />
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding StringError}" />
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Палец 3 -->
+                    <GroupBox Header="Палец 3" DataContext="{Binding Fingers[2]}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Label Content="Палец _3: лад" Target="{Binding ElementName=Finger3Fret}" />
+                                    <TextBox x:Name="Finger3Fret" MaxLength="3"
+                                             Text="{Binding Fret, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{Binding FretLabel}"
+                                             AutomationProperties.HelpText="{Binding FretHelp}"
+                                             AutomationProperties.ItemStatus="{Binding FretError}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <Label Content="Струна" Target="{Binding ElementName=Finger3String}" />
+                                    <TextBox x:Name="Finger3String" MaxLength="2"
+                                             Text="{Binding GuitarString, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{Binding StringLabel}"
+                                             AutomationProperties.HelpText="{Binding StringHelp}"
+                                             AutomationProperties.ItemStatus="{Binding StringError}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding FretError}" />
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding StringError}" />
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Палец 4 -->
+                    <GroupBox Header="Палец 4" DataContext="{Binding Fingers[3]}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Label Content="Палец _4: лад" Target="{Binding ElementName=Finger4Fret}" />
+                                    <TextBox x:Name="Finger4Fret" MaxLength="3"
+                                             Text="{Binding Fret, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{Binding FretLabel}"
+                                             AutomationProperties.HelpText="{Binding FretHelp}"
+                                             AutomationProperties.ItemStatus="{Binding FretError}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <Label Content="Струна" Target="{Binding ElementName=Finger4String}" />
+                                    <TextBox x:Name="Finger4String" MaxLength="2"
+                                             Text="{Binding GuitarString, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="{Binding StringLabel}"
+                                             AutomationProperties.HelpText="{Binding StringHelp}"
+                                             AutomationProperties.ItemStatus="{Binding StringError}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding FretError}" />
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding StringError}" />
+                        </StackPanel>
+                    </GroupBox>
+
+                    <Label Content="_Заглушенные струны" Target="{Binding ElementName=MutedBox}" />
+                    <TextBox x:Name="MutedBox"
+                             Text="{Binding MutedStrings, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Заглушенные струны"
+                             AutomationProperties.HelpText="{Binding MutedHelp}"
+                             AutomationProperties.ItemStatus="{Binding MutedError}" />
+                    <TextBlock Style="{StaticResource HintText}" Text="{x:Static parsing:MutedStringsParser.HelpText}" />
+                    <TextBlock Style="{StaticResource ErrorText}" Text="{Binding MutedError}" />
+
+                    <GroupBox Header="Ориентация грифа">
+                        <StackPanel Orientation="Horizontal"
+                                    KeyboardNavigation.DirectionalNavigation="Cycle"
+                                    KeyboardNavigation.TabNavigation="Once">
+                            <RadioButton Content="_Вертикально" GroupName="Orientation"
+                                         IsChecked="{Binding IsVertical}"
+                                         GotKeyboardFocus="RadioButton_GotKeyboardFocus"
+                                         AutomationProperties.Name="Ориентация грифа: вертикально"
+                                         AutomationProperties.HelpText="Слева 6 струна, справа 1. Лады растут сверху вниз. Стрелки переключают ориентацию." />
+                            <RadioButton Content="_Горизонтально" GroupName="Orientation"
+                                         IsChecked="{Binding IsHorizontal}"
+                                         GotKeyboardFocus="RadioButton_GotKeyboardFocus"
+                                         AutomationProperties.Name="Ориентация грифа: горизонтально"
+                                         AutomationProperties.HelpText="Снизу 6 струна, сверху 1. Лады растут слева направо. Стрелки переключают ориентацию." />
+                        </StackPanel>
+                    </GroupBox>
+
+                    <Label Content="_Холст" Target="{Binding ElementName=CanvasBox}" />
+                    <ComboBox x:Name="CanvasBox"
+                              ItemsSource="{Binding CanvasOptions}" DisplayMemberPath="Name"
+                              SelectedValuePath="Value" SelectedValue="{Binding Canvas}"
+                              AutomationProperties.Name="Холст"
+                              AutomationProperties.HelpText="Соотношение сторон и размер картинки. Не зависит от ориентации грифа. Стрелки вверх и вниз меняют выбор." />
+
+                    <Label Content="Сти_ль изображения" Target="{Binding ElementName=StyleBox}" />
+                    <ComboBox x:Name="StyleBox"
+                              ItemsSource="{Binding StyleOptions}" DisplayMemberPath="Name"
+                              SelectedValuePath="Value" SelectedValue="{Binding Style}"
+                              AutomationProperties.Name="Стиль изображения"
+                              AutomationProperties.HelpText="Меняет только оформление, аппликатура и цифры пальцев остаются теми же." />
+
+                    <Label Content="_Формат" Target="{Binding ElementName=FormatBox}" />
+                    <ComboBox x:Name="FormatBox"
+                              ItemsSource="{Binding FormatOptions}" DisplayMemberPath="Name"
+                              SelectedValuePath="Value" SelectedValue="{Binding Format}"
+                              AutomationProperties.Name="Формат файла"
+                              AutomationProperties.HelpText="GIF — основной формат, статический один кадр. PNG без потерь. JPG с высоким качеством." />
+
+                    <Label Content="_Имя файла" Target="{Binding ElementName=FileNameBox}" />
+                    <TextBox x:Name="FileNameBox"
+                             Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Имя файла"
+                             AutomationProperties.HelpText="{Binding FileNameHelp}" />
+                    <TextBlock Style="{StaticResource HintText}">
+                        <Run Text="Будет сохранено как:" />
+                        <Run Text="{Binding EffectiveFileName, Mode=OneWay}" FontWeight="SemiBold" />
+                    </TextBlock>
+
+                    <Button Content="Выбор _пути…" Command="{Binding ChooseFolderCommand}"
+                            AutomationProperties.Name="Выбор пути"
+                            AutomationProperties.HelpText="Открывает системный диалог выбора папки для сохранения. Горячая клавиша Ctrl+O." />
+                    <Label Content="Текущий путь" Target="{Binding ElementName=FolderBox}" Padding="0,0,0,2" />
+                    <TextBox x:Name="FolderBox" Style="{StaticResource ReadOnlyText}"
+                             Text="{Binding OutputFolder, Mode=OneWay}"
+                             AutomationProperties.Name="Текущий путь"
+                             AutomationProperties.HelpText="Папка, куда сохраняется картинка. Изменить: кнопка Выбор пути." />
+
+                    <Button Content="_Сохранить" Command="{Binding SaveCommand}" FontWeight="SemiBold"
+                            AutomationProperties.Name="Сохранить"
+                            AutomationProperties.HelpText="Сохраняет картинку в выбранную папку. Горячая клавиша Ctrl+S. Результат будет объявлен." />
+
+                    <TextBox Style="{StaticResource ReadOnlyText}" Text="{Binding StatusMessage, Mode=OneWay}"
+                             Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}"
+                             AutomationProperties.Name="Результат сохранения" />
+                    <TextBox Style="{StaticResource ReadOnlyText}" Text="{Binding ErrorSummary, Mode=OneWay}"
+                             Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}"
+                             AutomationProperties.Name="Сводка ошибок" />
+                    <TextBox Style="{StaticResource ReadOnlyText}" Text="{Binding WarningSummary, Mode=OneWay}"
+                             Visibility="{Binding HasWarnings, Converter={StaticResource BoolToVisibility}}"
+                             AutomationProperties.Name="Предупреждения" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Превью: тот же bitmap, что уйдет в файл, просто масштабированный. -->
+            <Border Grid.Column="1" Margin="0,0,12,0" Background="#111111" BorderBrush="#444444" BorderThickness="1">
+                <Grid>
+                    <Image Source="{Binding Preview}" Stretch="Uniform" Margin="8"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           AutomationProperties.Name="Превью картинки аккорда"
+                           AutomationProperties.HelpText="{Binding Description}" />
+                    <TextBlock Foreground="White" TextWrapping="Wrap" Margin="24"
+                               VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
+                               Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}"
+                               Text="Превью не обновлено: в аккорде есть ошибки. Список ошибок — в форме слева." />
+                </Grid>
+            </Border>
+
+            <DockPanel Grid.Column="2">
+                <Label DockPanel.Dock="Top" Content="_Описание аккорда" Target="{Binding ElementName=DescriptionBox}" />
+                <TextBox x:Name="DescriptionBox" Style="{StaticResource ReadOnlyText}"
+                         Text="{Binding Description, Mode=OneWay}"
+                         VerticalScrollBarVisibility="Auto"
+                         AutomationProperties.Name="Описание аккорда"
+                         AutomationProperties.HelpText="Полное текстовое описание картинки. Обновляется через долю секунды после ввода и не объявляется автоматически." />
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>
