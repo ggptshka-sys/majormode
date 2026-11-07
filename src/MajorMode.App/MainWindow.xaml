@@ -36,16 +36,24 @@
             </StackPanel>
         </Border>
 
-        <!-- Строка состояния: последнее объявление для программы экранного доступа (видно и зрячим). -->
+        <!-- Строка состояния: состояние картинки и последнее объявление. NVDA+End / Диктор+End читают ее целиком. -->
         <StatusBar DockPanel.Dock="Bottom" Focusable="False">
-            <StatusBarItem>
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel LastChildFill="True" />
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem DockPanel.Dock="Left">
                 <StackPanel Orientation="Horizontal">
-                    <Ellipse Width="7" Height="7" Margin="0,0,8,0" VerticalAlignment="Center"
-                             Fill="{DynamicResource Brush.Accent}" />
-                    <TextBlock x:Name="AnnouncementText" TextWrapping="Wrap"
-                               AutomationProperties.Name="Последнее сообщение"
-                               AutomationProperties.LiveSetting="Polite" />
+                    <Ellipse Style="{DynamicResource StateDot}" Width="8" Height="8" Margin="0,0,8,0" />
+                    <TextBlock Text="{Binding StateText}" FontWeight="SemiBold" />
                 </StackPanel>
+            </StatusBarItem>
+            <Separator DockPanel.Dock="Left" Margin="10,2" Background="{DynamicResource Brush.CardBorder}" />
+            <StatusBarItem>
+                <TextBlock x:Name="AnnouncementText" TextWrapping="Wrap"
+                           AutomationProperties.Name="Последнее сообщение"
+                           AutomationProperties.LiveSetting="Polite" />
             </StatusBarItem>
         </StatusBar>
 
@@ -280,7 +288,7 @@
                                      AutomationProperties.Name="Текущий путь"
                                      AutomationProperties.HelpText="Папка, куда сохраняется картинка. Изменить: кнопка Выбор пути." />
 
-                            <Button Content="_Сохранить" Command="{Binding SaveCommand}" Style="{DynamicResource AccentButton}"
+                            <Button x:Name="SaveButton" Content="_Сохранить" Command="{Binding SaveCommand}" Style="{DynamicResource AccentButton}"
                                     AutomationProperties.Name="Сохранить"
                                     AutomationProperties.HelpText="Сохраняет картинку в выбранную папку. Горячая клавиша Ctrl+S. Результат будет объявлен." />
 
@@ -312,6 +320,12 @@
                             <TextBlock Style="{DynamicResource ChipText}" Text="{Binding PreviewCaption}" />
                         </Border>
                     </Grid>
+                    <Border DockPanel.Dock="Bottom" Style="{DynamicResource StatePill}" Margin="0,10,0,0">
+                        <DockPanel>
+                            <Ellipse Style="{DynamicResource StateDot}" />
+                            <TextBlock Style="{DynamicResource StateText}" Text="{Binding StateText}" />
+                        </DockPanel>
+                    </Border>
                     <Border Style="{DynamicResource PreviewInset}">
                         <Grid>
                             <Image Source="{Binding Preview}" Stretch="Uniform" Margin="10"

@@ -15,6 +15,15 @@ using RenderOptions = MajorMode.Core.Model.RenderOptions;
 
 namespace MajorMode.App.ViewModels;
 
+public enum ImageState
+{
+    Ready,
+    Invalid,
+    Saving,
+    Saved,
+    SaveFailed,
+}
+
 public sealed class MainViewModel : ObservableObject
 {
     private static readonly TimeSpan PreviewDelay = TimeSpan.FromMilliseconds(150);
@@ -48,6 +57,11 @@ public sealed class MainViewModel : ObservableObject
     private ChordAnalysis _analysis;
     private string _lastAnnouncedProblems = string.Empty;
     private int _previewVersion;
+    private ImageState? _saveOutcome;
+    private string _savedFileName = string.Empty;
+    private bool _everSaved;
+    private ImageState _state;
+    private string _stateText = string.Empty;
 
     public MainViewModel(IAnnouncer announcer, IDialogService dialogs, SettingsStore settingsStore)
     {
@@ -84,6 +98,7 @@ public sealed class MainViewModel : ObservableObject
         ApplyAnalysis();
         Description = _analysis.Description;
         RenderPreview();
+        UpdateState();
     }
 
     public IReadOnlyList<FingerRowViewModel> Fingers { get; }
@@ -213,6 +228,7 @@ public sealed class MainViewModel : ObservableObject
                 OnPropertyChanged(nameof(EffectiveFileName));
                 OnPropertyChanged(nameof(FileNameHelp));
                 OnPropertyChanged(nameof(PreviewCaption));
+                MarkChanged();
             }
         }
     }
@@ -241,6 +257,7 @@ public sealed class MainViewModel : ObservableObject
             _fileNameEdited = value.Trim().Length > 0 && value != AutoFileName;
             OnPropertyChanged(nameof(EffectiveFileName));
             OnPropertyChanged(nameof(FileNameHelp));
+            MarkChanged();
         }
     }
 
@@ -327,6 +344,27 @@ public sealed class MainViewModel : ObservableObject
         private set => Set(ref _isBusy, value);
     }
 
+    /// <summary>Состояние картинки для индикатора под превью и в строке состояния.</summary>
+    public ImageState State
+    {
+        get => _state;
+        private set
+        {
+            if (Set(ref _state, value))
+            {
+                OnPropertyChanged(nameof(StateKey));
+            }
+        }
+    }
+
+    public string StateKey => State.ToString();
+
+    public string StateText
+    {
+        get => _stateText;
+        private set => Set(ref _stateText, value);
+    }
+
     public void PersistSettings() => _settingsStore.Save(new AppSettings
     {
         OutputFolder = OutputFolder,
@@ -402,7 +440,31 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
-    private void SchedulePreview() => Restart(_previewTimer);
+    private void SchedulePreview()
+    {
+        Restart(_previewTimer);
+        MarkChanged();
+    }
+
+    /// <summary>Любое изменение того, что попадет в файл, сбрасывает "Сохранено".</summary>
+    private void MarkChanged()
+    {
+        _saveOutcome = null;
+        UpdateState();
+    }
+
+    private void UpdateState()
+    {
+        (State, StateText) = (IsBusy, _analysis.CanRender, _saveOutcome) switch
+        {
+            (true, _, _) => (ImageState.Saving, "Сохранение…"),
+            (_, false, _) => (ImageState.Invalid, "Есть ошибки: картинка не построена"),
+            (_, _, ImageState.Saved) => (ImageState.Saved, $"Сохранено: {_savedFileName}"),
+            (_, _, ImageState.SaveFailed) => (ImageState.SaveFailed, "Не сохранено: причина в сообщении ниже"),
+            _ when _everSaved => (ImageState.Ready, "Изменено, не сохранено"),
+            _ => (ImageState.Ready, "Картинка готова, не сохранена"),
+        };
+    }
 
     private static void Restart(DispatcherTimer timer)
     {
@@ -446,6 +508,7 @@ public sealed class MainViewModel : ObservableObject
         }
 
         OutputFolder = folder;
+        MarkChanged();
         PersistSettings();
         StatusMessage = $"Папка для сохранения: {folder}";
         _announcer.Announce(StatusMessage, important: false);
@@ -466,6 +529,8 @@ public sealed class MainViewModel : ObservableObject
         var (path, pathError) = FileNameSanitizer.BuildFullPath(OutputFolder, FileNameSource, Format);
         if (path is null)
         {
+            _saveOutcome = ImageState.SaveFailed;
+            UpdateState();
             Report($"Не сохранено. {pathError}");
             return;
         }
@@ -483,6 +548,7 @@ public sealed class MainViewModel : ObservableObject
 
         IsBusy = true;
         StatusMessage = "Сохранение…";
+        UpdateState();
         try
         {
             var result = await Task.Run(() =>
@@ -490,6 +556,7 @@ public sealed class MainViewModel : ObservableObject
                 using var image = ChordRenderer.Render(chord, range, options);
                 return ImageExporter.Save(image, format, options.Style, path, overwrite: true);
             });
+            SetSaveOutcome(result.Success, path);
             Report(result.Message);
             if (result.Success)
             {
@@ -498,11 +565,23 @@ public sealed class MainViewModel : ObservableObject
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
+            SetSaveOutcome(false, path);
             Report($"Ошибка сохранения. {ex.Message}");
         }
         finally
         {
             IsBusy = false;
+            UpdateState();
+        }
+    }
+
+    private void SetSaveOutcome(bool success, string path)
+    {
+        _saveOutcome = success ? ImageState.Saved : ImageState.SaveFailed;
+        if (success)
+        {
+            _savedFileName = Path.GetFileName(path);
+            _everSaved = true;
         }
     }
 

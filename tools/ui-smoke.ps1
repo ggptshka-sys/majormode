@@ -103,6 +103,10 @@ try {
     Start-Sleep -Seconds 2
     Save-Shot '02-chord-c'
 
+    (Find-Id 'SaveButton').GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+    Start-Sleep -Seconds 3
+    Save-Shot '02b-saved'
+
     Set-Finger 4 '0' '3'
     Start-Sleep -Seconds 3
     Save-Shot '03-error'

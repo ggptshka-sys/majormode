@@ -26,6 +26,26 @@
         <Setter Property="FontSize" Value="12" />
     </Style>
 
+    <Style x:Key="StatePill" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.CardBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,4" />
+    </Style>
+
+    <Style x:Key="StateDot" TargetType="Ellipse">
+        <Setter Property="Width" Value="10" />
+        <Setter Property="Height" Value="10" />
+        <Setter Property="Margin" Value="0,0,8,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Fill" Value="{DynamicResource Brush.Text}" />
+    </Style>
+
+    <Style x:Key="StateText" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
     <Style x:Key="SegmentTrack" TargetType="Border">
         <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>

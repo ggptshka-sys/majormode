@@ -74,6 +74,73 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- Индикатор состояния картинки (StateKey из MainViewModel). Цвет дублирует текст, а не заменяет его. -->
+    <Style x:Key="StatePill" TargetType="Border">
+        <Setter Property="Background" Value="#10302D" />
+        <Setter Property="BorderBrush" Value="#1E5A54" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="12,8" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding StateKey}" Value="Invalid">
+                <Setter Property="Background" Value="#33161A" />
+                <Setter Property="BorderBrush" Value="#6B2A30" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StateKey}" Value="SaveFailed">
+                <Setter Property="Background" Value="#33161A" />
+                <Setter Property="BorderBrush" Value="#6B2A30" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StateKey}" Value="Saving">
+                <Setter Property="Background" Value="#332A12" />
+                <Setter Property="BorderBrush" Value="#6B5520" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StateKey}" Value="Saved">
+                <Setter Property="Background" Value="#11301E" />
+                <Setter Property="BorderBrush" Value="#2A6B45" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="StateDot" TargetType="Ellipse">
+        <Setter Property="Width" Value="10" />
+        <Setter Property="Height" Value="10" />
+        <Setter Property="Margin" Value="0,0,10,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Fill" Value="{StaticResource Brush.Accent}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding StateKey}" Value="Invalid">
+                <Setter Property="Fill" Value="{StaticResource Brush.Error}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StateKey}" Value="SaveFailed">
+                <Setter Property="Fill" Value="{StaticResource Brush.Error}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StateKey}" Value="Saved">
+                <Setter Property="Fill" Value="#4ADE80" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StateKey}" Value="Saving">
+                <Setter Property="Fill" Value="#FFB547" />
+                <DataTrigger.EnterActions>
+                    <BeginStoryboard x:Name="SavingPulse">
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.3" Duration="0:0:0.5"
+                                             AutoReverse="True" RepeatBehavior="Forever" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </DataTrigger.EnterActions>
+                <DataTrigger.ExitActions>
+                    <StopStoryboard BeginStoryboardName="SavingPulse" />
+                </DataTrigger.ExitActions>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="StateText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
     <!-- Label: стандартный шаблон (access keys работают), меняем только цвет и размер. -->
     <Style TargetType="Label">
         <Setter Property="Foreground" Value="{StaticResource Brush.Label}" />
