@@ -14,30 +14,16 @@
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding ChooseFolderCommand}" />
     </Window.InputBindings>
 
-    <DockPanel>
-        <!-- Шапка: только оформление, фокус не получает. -->
-        <Border DockPanel.Dock="Top" Background="{DynamicResource Brush.Header}"
-                BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="0,0,0,1" Padding="18,10">
-            <StackPanel Orientation="Horizontal">
-                <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource Brush.Field}"
-                        BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="1" VerticalAlignment="Center">
-                    <UniformGrid Rows="2" Columns="2" Margin="8">
-                        <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger1}" />
-                        <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger2}" />
-                        <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger3}" />
-                        <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger4}" />
-                    </UniformGrid>
-                </Border>
-                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="MajorMode" FontSize="18" FontWeight="Bold" />
-                    <TextBlock Text="Картинки гитарных аккордов для видео" FontSize="12"
-                               Foreground="{DynamicResource Brush.TextMuted}" />
-                </StackPanel>
-            </StackPanel>
-        </Border>
+    <!-- Шапка объявлена последней: по Tab кнопка обновлений идет после всех полей формы. -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
         <!-- Строка состояния: состояние картинки и последнее объявление. NVDA+End / Диктор+End читают ее целиком. -->
-        <StatusBar DockPanel.Dock="Bottom" Focusable="False">
+        <StatusBar Grid.Row="2" Focusable="False">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <DockPanel LastChildFill="True" />
@@ -57,7 +43,7 @@
             </StatusBarItem>
         </StatusBar>
 
-        <Grid Margin="16,14,16,6">
+        <Grid Grid.Row="1" Margin="16,14,16,6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="420" />
                 <ColumnDefinition Width="*" MinWidth="300" />
@@ -355,5 +341,35 @@
                 </DockPanel>
             </Border>
         </Grid>
-    </DockPanel>
+
+        <Border Grid.Row="0" Background="{DynamicResource Brush.Header}"
+                BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="0,0,0,1" Padding="18,10">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding AppVersionText}" VerticalAlignment="Center" Margin="0,0,14,0"
+                               FontSize="13" Foreground="{DynamicResource Brush.TextMuted}" />
+                    <Button x:Name="CheckUpdatesButton" Content="Проверить о_бновления" Margin="0"
+                            Command="{Binding CheckUpdatesCommand}"
+                            AutomationProperties.Name="Проверить обновления"
+                            AutomationProperties.HelpText="Сверяет версию с последней на GitHub. Если есть новая, спросит подтверждение, скачает ее и перезапустит программу. Alt+Б." />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource Brush.Field}"
+                            BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="1" VerticalAlignment="Center">
+                        <UniformGrid Rows="2" Columns="2" Margin="8">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger1}" />
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger2}" />
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger3}" />
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger4}" />
+                        </UniformGrid>
+                    </Border>
+                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="MajorMode" FontSize="18" FontWeight="Bold" />
+                        <TextBlock Text="Картинки гитарных аккордов для видео" FontSize="12"
+                                   Foreground="{DynamicResource Brush.TextMuted}" />
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
 </Window>

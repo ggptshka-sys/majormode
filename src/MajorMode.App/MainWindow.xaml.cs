@@ -14,9 +14,23 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        _viewModel = new MainViewModel(new UiaAnnouncer(AnnouncementText), new WpfDialogService(() => this), new SettingsStore());
+        _viewModel = new MainViewModel(
+            new UiaAnnouncer(AnnouncementText),
+            new WpfDialogService(() => this),
+            new SettingsStore(),
+            new UpdateService(),
+            () => Application.Current.Shutdown());
         DataContext = _viewModel;
-        Loaded += (_, _) => ChordNameBox.Focus();
+        Loaded += async (_, _) =>
+        {
+            ChordNameBox.Focus();
+            if (App.UpdatedFromVersion is { } from)
+            {
+                // Даем программе экранного доступа дочитать окно и поле в фокусе.
+                await Task.Delay(TimeSpan.FromSeconds(2));
+                _viewModel.AnnounceUpdated(from);
+            }
+        };
         Closing += (_, _) => _viewModel.PersistSettings();
         SourceInitialized += (_, _) => ThemeManager.ApplyTitleBar(this);
         ThemeManager.ThemeChanged += OnThemeChanged;

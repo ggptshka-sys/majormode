@@ -12,9 +12,13 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
+    permissions:
+      # Публикация GitHub Release (только push в main) — из нее программа обновляется по кнопке.
+      contents: write
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
+      APP_VERSION: 0.1.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
 
@@ -26,7 +30,7 @@ jobs:
         run: dotnet restore MajorMode.sln
 
       - name: Build
-        run: dotnet build MajorMode.sln -c Release --no-restore
+        run: dotnet build MajorMode.sln -c Release --no-restore -p:Version=${{ env.APP_VERSION }}
 
       - name: Test
         run: dotnet test tests/MajorMode.Tests/MajorMode.Tests.csproj -c Release --no-build --logger "trx;LogFileName=results.trx" --results-directory TestResults
@@ -35,11 +39,39 @@ jobs:
         run: dotnet run --project tools/MajorMode.Samples/MajorMode.Samples.csproj -c Release --no-build -- artifacts/samples --all-formats
 
       - name: Publish single-file exe
-        run: dotnet publish src/MajorMode.App/MajorMode.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win-x64
+        run: dotnet publish src/MajorMode.App/MajorMode.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=${{ env.APP_VERSION }} -o publish/win-x64
+
+      - name: Checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash publish/win-x64/MajorMode.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  MajorMode.exe" | Out-File -FilePath publish/MajorMode.exe.sha256 -Encoding ascii -NoNewline
 
       - name: UI smoke test (launch, screenshots)
         shell: powershell
         run: ./tools/ui-smoke.ps1 -Exe publish/win-x64/MajorMode.exe -OutDir artifacts/ui
+
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          $tag = "v$env:APP_VERSION"
+          "Сборка из коммита $env:GITHUB_SHA.`n`n$env:COMMIT_MESSAGE" | Out-File -FilePath release-notes.md -Encoding utf8
+          gh release create $tag publish/win-x64/MajorMode.exe publish/MajorMode.exe.sha256 `
+            --title "MajorMode $env:APP_VERSION" --notes-file release-notes.md --target $env:GITHUB_SHA --latest
+          # Храним последние 10 релизов, старые удаляем вместе с тегами.
+          gh release list --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[10:] | .[].tagName' |
+            ForEach-Object { gh release delete $_ --cleanup-tag --yes }
+
+      - name: Update end-to-end test (previous release -> this one)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./tools/update-e2e.ps1 -ExpectedVersion $env:APP_VERSION -OutDir artifacts/ui
 
       - uses: actions/upload-artifact@v4
         if: always()

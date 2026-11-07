@@ -16,6 +16,8 @@ public interface IDialogService
     string? PickFolder(string? initialFolder);
 
     bool ConfirmOverwrite(string fullPath);
+
+    bool ConfirmUpdate(string currentVersion, string newVersion);
 }
 
 public sealed class WpfDialogService(Func<Window?> owner) : IDialogService
@@ -42,6 +44,17 @@ public sealed class WpfDialogService(Func<Window?> owner) : IDialogService
         var result = w is null
             ? MessageBox.Show(text, "Подтверждение перезаписи", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No)
             : MessageBox.Show(w, text, "Подтверждение перезаписи", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+        return result == MessageBoxResult.Yes;
+    }
+
+    public bool ConfirmUpdate(string currentVersion, string newVersion)
+    {
+        var text = $"Доступна новая версия {newVersion}. Установлена {currentVersion}.\n\n" +
+                   "Скачать и установить сейчас? Программа перезапустится, введенный аккорд не сохранится. Уже сохраненные картинки и настройки не изменятся.";
+        var w = owner();
+        var result = w is null
+            ? MessageBox.Show(text, "Обновление MajorMode", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes)
+            : MessageBox.Show(w, text, "Обновление MajorMode", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
         return result == MessageBoxResult.Yes;
     }
 }

@@ -129,6 +129,10 @@ try {
     Start-Sleep -Seconds 2
     Save-Shot '05-modern-portrait'
 
+    (Find-Id 'CheckUpdatesButton').GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+    Start-Sleep -Seconds 6
+    Save-Shot '06-update-check'
+
     $all = $script:root.FindAll($Scope::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
     $lines = foreach ($e in $all) {
         $c = $e.Current

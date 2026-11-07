@@ -33,6 +33,8 @@ public sealed class MainViewModel : ObservableObject
     private readonly IAnnouncer _announcer;
     private readonly IDialogService _dialogs;
     private readonly SettingsStore _settingsStore;
+    private readonly UpdateService _updates;
+    private readonly Action _shutdown;
     private readonly DispatcherTimer _previewTimer;
     private readonly DispatcherTimer _descriptionTimer;
     private readonly DispatcherTimer _announceTimer;
@@ -54,6 +56,7 @@ public sealed class MainViewModel : ObservableObject
     private string _warningSummary = string.Empty;
     private string _statusMessage = string.Empty;
     private bool _isBusy;
+    private bool _isSaving;
     private ChordAnalysis _analysis;
     private string _lastAnnouncedProblems = string.Empty;
     private int _previewVersion;
@@ -63,11 +66,13 @@ public sealed class MainViewModel : ObservableObject
     private ImageState _state;
     private string _stateText = string.Empty;
 
-    public MainViewModel(IAnnouncer announcer, IDialogService dialogs, SettingsStore settingsStore)
+    public MainViewModel(IAnnouncer announcer, IDialogService dialogs, SettingsStore settingsStore, UpdateService updates, Action shutdown)
     {
         _announcer = announcer;
         _dialogs = dialogs;
         _settingsStore = settingsStore;
+        _updates = updates;
+        _shutdown = shutdown;
 
         Fingers = Enumerable.Range(1, ChordRules.FingerCount).Select(n => new FingerRowViewModel(n, OnInputChanged)).ToArray();
         CanvasOptions = Enum.GetValues<CanvasFormat>().Select(c => new Option<CanvasFormat>(c, c.DisplayName())).ToArray();
@@ -94,6 +99,7 @@ public sealed class MainViewModel : ObservableObject
         _fileName = AutoFileName;
         ChooseFolderCommand = new RelayCommand(ChooseFolder, () => !IsBusy);
         SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
+        CheckUpdatesCommand = new AsyncRelayCommand(CheckUpdatesAsync, () => !IsBusy);
 
         ApplyAnalysis();
         Description = _analysis.Description;
@@ -112,6 +118,10 @@ public sealed class MainViewModel : ObservableObject
     public ICommand ChooseFolderCommand { get; }
 
     public ICommand SaveCommand { get; }
+
+    public ICommand CheckUpdatesCommand { get; }
+
+    public string AppVersionText => $"Версия {UpdateService.CurrentVersionText}";
 
     public string ChordName
     {
@@ -455,7 +465,7 @@ public sealed class MainViewModel : ObservableObject
 
     private void UpdateState()
     {
-        (State, StateText) = (IsBusy, _analysis.CanRender, _saveOutcome) switch
+        (State, StateText) = (_isSaving, _analysis.CanRender, _saveOutcome) switch
         {
             (true, _, _) => (ImageState.Saving, "Сохранение…"),
             (_, false, _) => (ImageState.Invalid, "Есть ошибки: картинка не построена"),
@@ -547,6 +557,7 @@ public sealed class MainViewModel : ObservableObject
         var format = Format;
 
         IsBusy = true;
+        _isSaving = true;
         StatusMessage = "Сохранение…";
         UpdateState();
         try
@@ -571,9 +582,52 @@ public sealed class MainViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+            _isSaving = false;
             UpdateState();
         }
     }
+
+    private async Task CheckUpdatesAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            StatusMessage = "Проверка обновлений…";
+            _announcer.Announce(StatusMessage, important: false);
+            var check = await _updates.CheckAsync();
+            if (check.Status != UpdateCheckStatus.Available || check.Release is null)
+            {
+                Report(check.Message);
+                return;
+            }
+
+            var newVersion = check.Release.Version.ToString(3);
+            if (!_dialogs.ConfirmUpdate(UpdateService.CurrentVersionText, newVersion))
+            {
+                Report($"Обновление до версии {newVersion} отложено.");
+                return;
+            }
+
+            _announcer.Announce($"Загрузка версии {newVersion}. Программа перезапустится сама.", important: true);
+            var error = await _updates.InstallAsync(check.Release, new Progress<string>(s => StatusMessage = s));
+            if (error is not null)
+            {
+                Report(error);
+                return;
+            }
+
+            PersistSettings();
+            _shutdown();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>Вызывается после перезапуска новой версией.</summary>
+    public void AnnounceUpdated(string fromVersion) =>
+        Report($"Программа обновлена: была версия {fromVersion}, теперь {UpdateService.CurrentVersionText}.");
 
     private void SetSaveOutcome(bool success, string path)
     {
