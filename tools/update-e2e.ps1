@@ -8,7 +8,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Drawing
+Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Drawing, System.Windows.Forms
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
@@ -88,7 +88,9 @@ try {
     $yes = $null
     $deadline = (Get-Date).AddSeconds(60)
     $pidCond = New-Object System.Windows.Automation.PropertyCondition($A::ProcessIdProperty, $old.Id)
-    $yesCond = New-Object System.Windows.Automation.PropertyCondition($A::AutomationIdProperty, '6')
+    $yesCond = New-Object System.Windows.Automation.AndCondition(
+        (New-Object System.Windows.Automation.PropertyCondition($A::AutomationIdProperty, '6')),
+        (New-Object System.Windows.Automation.PropertyCondition($A::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)))
     while (-not $yes -and (Get-Date) -lt $deadline) {
         Start-Sleep -Milliseconds 500
         foreach ($w in $A::RootElement.FindAll($Scope::Children, $pidCond)) {
@@ -103,7 +105,14 @@ try {
         Save-Shot $old.MainWindowHandle 'e2e-failure'
         throw 'Update confirmation dialog did not appear'
     }
-    $yes.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+    $invoke = $null
+    if ($yes.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$invoke)) {
+        $invoke.Invoke()
+    } else {
+        # "Yes" is the default button of the dialog.
+        $yes.SetFocus()
+        [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
+    }
 
     if (-not $old.WaitForExit(300000)) {
         Save-Shot $old.MainWindowHandle 'e2e-failure'
