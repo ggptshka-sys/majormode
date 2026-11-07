@@ -25,7 +25,7 @@ Windows desktop приложение (MVP), которое рисует аппл
 | Собрать один `.exe` | `dotnet publish src/MajorMode.App/MajorMode.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win-x64-single` |
 | Образцы картинок | `dotnet run --project tools/MajorMode.Samples/MajorMode.Samples.csproj -- artifacts/samples --all-formats` (добавьте `--4k` для 4K) |
 
-Готовый файл: `publish/win-x64-single/MajorMode.exe`. Нативная библиотека SkiaSharp упакована внутрь exe (`IncludeNativeLibrariesForSelfExtract`).
+Готовый файл: `publish/win-x64-single/MajorMode.exe` (около 70 МБ: внутри .NET runtime, WPF и SkiaSharp, сжатие `EnableCompressionInSingleFile`). Нативная библиотека SkiaSharp упакована внутрь exe (`IncludeNativeLibrariesForSelfExtract`), `.pdb` после публикации в Release удаляются. Тот же exe собирается в GitHub Actions и доступен как артефакт `MajorMode-win-x64` у каждого прогона.
 
 ## Как пользоваться
 
@@ -214,8 +214,9 @@ PNG без потерь, JPG с качеством 92, фон всегда не�
 
 ## Что проверено
 
-- На macOS (Apple Silicon, .NET SDK 10.0.403): сборка всего решения, включая **компиляцию** WPF-проекта и XAML (`EnableWindowsTargeting`); все unit-тесты Core, рендера и экспорта; образцы картинок просмотрены глазами; GIF открываются системными `sips`/`file` как GIF89a 1080×1920 и 1920×1080.
-- **Не проверено**: запуск WPF-приложения на Windows, работа с NVDA и Экранным диктором, высокая контрастность, GitHub Actions workflow (не запускался), вставка в REAPER 5.
+- На macOS (Apple Silicon, .NET SDK 10.0.403): сборка всего решения, включая **компиляцию** WPF-проекта и XAML (`EnableWindowsTargeting`); все unit-тесты; образцы картинок просмотрены глазами; GIF открываются системными `sips`/`file` как GIF89a 1080×1920 и 1920×1080.
+- В GitHub Actions (`windows-latest`): restore, сборка Release всего решения, все тесты, генерация образцов (просмотрены образцы с Windows-шрифтом Segoe UI), публикация single-file exe.
+- **Не проверено**: запуск и работа окна WPF на Windows, работа с NVDA и Экранным диктором, высокая контрастность и масштаб, вставка GIF в REAPER 5.
 
 ## Разработка
 

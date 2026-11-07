@@ -9,7 +9,16 @@
     <Title>MajorMode — картинки аккордов</Title>
     <!-- Для single-file публикации нативная библиотека SkiaSharp распаковывается из exe. -->
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
+
+  <!-- Отладочные символы (включая 96 МБ libSkiaSharp.pdb) не нужны пользователю в папке публикации. -->
+  <Target Name="RemovePdbAfterPublish" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <_MajorModePdb Include="$(PublishDir)*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(_MajorModePdb)" />
+  </Target>
 
   <ItemGroup>
     <ProjectReference Include="..\MajorMode.Core\MajorMode.Core.csproj" />

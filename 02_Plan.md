@@ -5,10 +5,10 @@
 - [x] 3. Геометрия и авто диапазон ладов + тесты
 - [x] 4. Renderer трех стилей + детерминированность + образцы
 - [x] 5. Экспорт GIF/PNG/JPG, имена, перезапись + тесты
-- [x] 6. WPF UI, MVVM, доступность, live region, превью, описание (компилируется; запуск не проверен)
+- [x] 6. WPF UI, MVVM, доступность, live region, превью, описание (компилируется; запуск окна не проверен)
 - [x] 7. README, CHANGELOG, CONTRIBUTING, .gitignore, GitHub Actions
-- [ ] 8. Push в GitHub
-- [ ] 9. Первый прогон GitHub Actions (Windows) — проверить, что зеленый
-- [ ] 10. Ручная проверка на Windows: запуск, NVDA, Narrator, высокая контрастность
+- [x] 8. Push в GitHub
+- [x] 9. GitHub Actions на Windows: сборка, 146 тестов, образцы, single-file exe — зеленый
+- [ ] 10. Ручная проверка на Windows: запуск, NVDA, Narrator, высокая контрастность (чеклист в README)
 - [ ] 11. Приемка учителем в REAPER 5 (GIF 1920×1080 и 1080×1920)
-- [ ] Позже: JSON-пресеты (SchemaVersion), выбор лицензии
+- [ ] Позже: JSON-пресеты (SchemaVersion), выбор лицензии, обновить actions до версий на Node 24
