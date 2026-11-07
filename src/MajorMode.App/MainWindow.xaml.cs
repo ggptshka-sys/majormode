@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using MajorMode.App.Services;
+using MajorMode.App.Themes;
 using MajorMode.App.ViewModels;
 
 namespace MajorMode.App;
@@ -17,7 +18,12 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
         Loaded += (_, _) => ChordNameBox.Focus();
         Closing += (_, _) => _viewModel.PersistSettings();
+        SourceInitialized += (_, _) => ThemeManager.ApplyTitleBar(this);
+        ThemeManager.ThemeChanged += OnThemeChanged;
+        Closed += (_, _) => ThemeManager.ThemeChanged -= OnThemeChanged;
     }
+
+    private void OnThemeChanged(object? sender, EventArgs e) => ThemeManager.ApplyTitleBar(this);
 
     /// <summary>Стрелки в группе переключателей не только переносят фокус, но и выбирают вариант (как в Win32).</summary>
     private void RadioButton_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)

@@ -37,11 +37,21 @@ jobs:
       - name: Publish single-file exe
         run: dotnet publish src/MajorMode.App/MajorMode.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win-x64
 
+      - name: UI smoke test (launch, screenshots)
+        shell: powershell
+        run: ./tools/ui-smoke.ps1 -Exe publish/win-x64/MajorMode.exe -OutDir artifacts/ui
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
           path: TestResults
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-screenshots
+          path: artifacts/ui
 
       - uses: actions/upload-artifact@v4
         with:

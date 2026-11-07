@@ -185,6 +185,7 @@ public sealed class MainViewModel : ObservableObject
         {
             if (Set(ref _canvas, value))
             {
+                OnPropertyChanged(nameof(PreviewCaption));
                 SchedulePreview();
             }
         }
@@ -211,7 +212,17 @@ public sealed class MainViewModel : ObservableObject
             {
                 OnPropertyChanged(nameof(EffectiveFileName));
                 OnPropertyChanged(nameof(FileNameHelp));
+                OnPropertyChanged(nameof(PreviewCaption));
             }
+        }
+    }
+
+    public string PreviewCaption
+    {
+        get
+        {
+            var size = Canvas.ToSize();
+            return $"{size.Width} × {size.Height}  ·  {Format.FileExtension().TrimStart('.').ToUpperInvariant()}";
         }
     }
 

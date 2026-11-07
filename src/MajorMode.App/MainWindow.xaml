@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:parsing="clr-namespace:MajorMode.Core.Parsing;assembly=MajorMode.Core"
         Title="MajorMode — картинки аккордов"
-        Width="1360" Height="900" MinWidth="980" MinHeight="620"
-        FontSize="15"
+        Width="1360" Height="900" MinWidth="1000" MinHeight="640"
+        FontSize="15" FontFamily="Segoe UI Variable Text, Segoe UI"
+        Background="{DynamicResource Brush.Window}"
+        Foreground="{DynamicResource Brush.Text}"
         WindowStartupLocation="CenterScreen">
 
     <Window.InputBindings>
@@ -13,37 +15,68 @@
     </Window.InputBindings>
 
     <DockPanel>
+        <!-- Шапка: только оформление, фокус не получает. -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource Brush.Header}"
+                BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="0,0,0,1" Padding="18,10">
+            <StackPanel Orientation="Horizontal">
+                <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource Brush.Field}"
+                        BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="1" VerticalAlignment="Center">
+                    <UniformGrid Rows="2" Columns="2" Margin="8">
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger1}" />
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger2}" />
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger3}" />
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Finger4}" />
+                    </UniformGrid>
+                </Border>
+                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="MajorMode" FontSize="18" FontWeight="Bold" />
+                    <TextBlock Text="Картинки гитарных аккордов для видео" FontSize="12"
+                               Foreground="{DynamicResource Brush.TextMuted}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
         <!-- Строка состояния: последнее объявление для программы экранного доступа (видно и зрячим). -->
         <StatusBar DockPanel.Dock="Bottom" Focusable="False">
             <StatusBarItem>
-                <TextBlock x:Name="AnnouncementText" TextWrapping="Wrap"
-                           AutomationProperties.Name="Последнее сообщение"
-                           AutomationProperties.LiveSetting="Polite" />
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="7" Height="7" Margin="0,0,8,0" VerticalAlignment="Center"
+                             Fill="{DynamicResource Brush.Accent}" />
+                    <TextBlock x:Name="AnnouncementText" TextWrapping="Wrap"
+                               AutomationProperties.Name="Последнее сообщение"
+                               AutomationProperties.LiveSetting="Polite" />
+                </StackPanel>
             </StatusBarItem>
         </StatusBar>
 
-        <Grid Margin="12">
+        <Grid Margin="16,14,16,6">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="430" />
+                <ColumnDefinition Width="450" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="330" />
+                <ColumnDefinition Width="340" />
             </Grid.ColumnDefinitions>
 
-            <!-- Форма. Порядок элементов = порядок Tab. -->
+            <!-- Форма. Порядок элементов = порядок Tab. Карточки (Border) фокус не получают. -->
             <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                          Focusable="False" IsTabStop="False" Padding="0,0,12,0">
+                          Focusable="False" IsTabStop="False" Padding="0,0,14,0">
                 <StackPanel>
-                    <Label Content="_Название аккорда" Target="{Binding ElementName=ChordNameBox}" />
-                    <TextBox x:Name="ChordNameBox"
-                             Text="{Binding ChordName, UpdateSourceTrigger=PropertyChanged}"
-                             AutomationProperties.Name="Название аккорда"
-                             AutomationProperties.HelpText="{Binding ChordNameHelp}" />
+                    <TextBlock Style="{StaticResource SectionCaption}" Text="АККОРД" />
+                    <Border Style="{DynamicResource Card}">
+                        <StackPanel>
+                            <Label Content="_Название аккорда" Target="{Binding ElementName=ChordNameBox}" Padding="0,0,0,4" />
+                            <TextBox x:Name="ChordNameBox" FontSize="17" FontWeight="SemiBold"
+                                     Text="{Binding ChordName, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="Название аккорда"
+                                     AutomationProperties.HelpText="{Binding ChordNameHelp}" />
+                            <TextBlock Style="{StaticResource HintText}" Margin="0,6,0,0"
+                                       Text="Чтобы пропустить палец, введите 0 в оба поля. Для баррэ первым пальцем введите латинскую B в поле «струна»." />
+                        </StackPanel>
+                    </Border>
 
-                    <TextBlock Style="{StaticResource HintText}" Margin="0,6,0,0"
-                               Text="Чтобы пропустить палец, введите 0 в оба поля. Для баррэ первым пальцем введите латинскую B в поле «струна»." />
+                    <TextBlock Style="{StaticResource SectionCaption}" Text="ПАЛЬЦЫ" Margin="2,8,0,6" />
 
                     <!-- Палец 1 -->
-                    <GroupBox Header="Палец 1" DataContext="{Binding Fingers[0]}">
+                    <GroupBox Header="Палец 1" Tag="{StaticResource Brush.Finger1}" DataContext="{Binding Fingers[0]}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -74,7 +107,7 @@
                     </GroupBox>
 
                     <!-- Палец 2 -->
-                    <GroupBox Header="Палец 2" DataContext="{Binding Fingers[1]}">
+                    <GroupBox Header="Палец 2" Tag="{StaticResource Brush.Finger2}" DataContext="{Binding Fingers[1]}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -105,7 +138,7 @@
                     </GroupBox>
 
                     <!-- Палец 3 -->
-                    <GroupBox Header="Палец 3" DataContext="{Binding Fingers[2]}">
+                    <GroupBox Header="Палец 3" Tag="{StaticResource Brush.Finger3}" DataContext="{Binding Fingers[2]}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -136,7 +169,7 @@
                     </GroupBox>
 
                     <!-- Палец 4 -->
-                    <GroupBox Header="Палец 4" DataContext="{Binding Fingers[3]}">
+                    <GroupBox Header="Палец 4" Tag="{StaticResource Brush.Finger4}" DataContext="{Binding Fingers[3]}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -166,110 +199,142 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <Label Content="_Заглушенные струны" Target="{Binding ElementName=MutedBox}" />
-                    <TextBox x:Name="MutedBox"
-                             Text="{Binding MutedStrings, UpdateSourceTrigger=PropertyChanged}"
-                             AutomationProperties.Name="Заглушенные струны"
-                             AutomationProperties.HelpText="{Binding MutedHelp}"
-                             AutomationProperties.ItemStatus="{Binding MutedError}" />
-                    <TextBlock Style="{StaticResource HintText}" Text="{x:Static parsing:MutedStringsParser.HelpText}" />
-                    <TextBlock Style="{StaticResource ErrorText}" Text="{Binding MutedError}" />
-
-                    <GroupBox Header="Ориентация грифа">
-                        <StackPanel Orientation="Horizontal"
-                                    KeyboardNavigation.DirectionalNavigation="Cycle"
-                                    KeyboardNavigation.TabNavigation="Once">
-                            <RadioButton Content="_Вертикально" GroupName="Orientation"
-                                         IsChecked="{Binding IsVertical}"
-                                         GotKeyboardFocus="RadioButton_GotKeyboardFocus"
-                                         AutomationProperties.Name="Ориентация грифа: вертикально"
-                                         AutomationProperties.HelpText="Слева 6 струна, справа 1. Лады растут сверху вниз. Стрелки переключают ориентацию." />
-                            <RadioButton Content="_Горизонтально" GroupName="Orientation"
-                                         IsChecked="{Binding IsHorizontal}"
-                                         GotKeyboardFocus="RadioButton_GotKeyboardFocus"
-                                         AutomationProperties.Name="Ориентация грифа: горизонтально"
-                                         AutomationProperties.HelpText="Снизу 6 струна, сверху 1. Лады растут слева направо. Стрелки переключают ориентацию." />
+                    <Border Style="{DynamicResource Card}">
+                        <StackPanel>
+                            <Label Content="_Заглушенные струны" Target="{Binding ElementName=MutedBox}" Padding="0,0,0,4" />
+                            <TextBox x:Name="MutedBox"
+                                     Text="{Binding MutedStrings, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="Заглушенные струны"
+                                     AutomationProperties.HelpText="{Binding MutedHelp}"
+                                     AutomationProperties.ItemStatus="{Binding MutedError}" />
+                            <TextBlock Style="{StaticResource HintText}" Text="{x:Static parsing:MutedStringsParser.HelpText}" />
+                            <TextBlock Style="{StaticResource ErrorText}" Text="{Binding MutedError}" />
                         </StackPanel>
-                    </GroupBox>
+                    </Border>
 
-                    <Label Content="_Холст" Target="{Binding ElementName=CanvasBox}" />
-                    <ComboBox x:Name="CanvasBox"
-                              ItemsSource="{Binding CanvasOptions}" DisplayMemberPath="Name"
-                              SelectedValuePath="Value" SelectedValue="{Binding Canvas}"
-                              AutomationProperties.Name="Холст"
-                              AutomationProperties.HelpText="Соотношение сторон и размер картинки. Не зависит от ориентации грифа. Стрелки вверх и вниз меняют выбор." />
+                    <TextBlock Style="{StaticResource SectionCaption}" Text="ОФОРМЛЕНИЕ" Margin="2,8,0,6" />
+                    <Border Style="{DynamicResource Card}">
+                        <StackPanel>
+                            <GroupBox Header="Ориентация грифа" Style="{DynamicResource InlineGroupBox}">
+                                <Border Style="{DynamicResource SegmentTrack}">
+                                    <StackPanel Orientation="Horizontal"
+                                                KeyboardNavigation.DirectionalNavigation="Cycle"
+                                                KeyboardNavigation.TabNavigation="Once">
+                                        <RadioButton Content="_Вертикально" GroupName="Orientation"
+                                                     IsChecked="{Binding IsVertical}"
+                                                     GotKeyboardFocus="RadioButton_GotKeyboardFocus"
+                                                     AutomationProperties.Name="Ориентация грифа: вертикально"
+                                                     AutomationProperties.HelpText="Слева 6 струна, справа 1. Лады растут сверху вниз. Стрелки переключают ориентацию." />
+                                        <RadioButton Content="_Горизонтально" GroupName="Orientation"
+                                                     IsChecked="{Binding IsHorizontal}"
+                                                     GotKeyboardFocus="RadioButton_GotKeyboardFocus"
+                                                     AutomationProperties.Name="Ориентация грифа: горизонтально"
+                                                     AutomationProperties.HelpText="Снизу 6 струна, сверху 1. Лады растут слева направо. Стрелки переключают ориентацию." />
+                                    </StackPanel>
+                                </Border>
+                            </GroupBox>
 
-                    <Label Content="Сти_ль изображения" Target="{Binding ElementName=StyleBox}" />
-                    <ComboBox x:Name="StyleBox"
-                              ItemsSource="{Binding StyleOptions}" DisplayMemberPath="Name"
-                              SelectedValuePath="Value" SelectedValue="{Binding Style}"
-                              AutomationProperties.Name="Стиль изображения"
-                              AutomationProperties.HelpText="Меняет только оформление, аппликатура и цифры пальцев остаются теми же." />
+                            <Label Content="_Холст" Target="{Binding ElementName=CanvasBox}" />
+                            <ComboBox x:Name="CanvasBox"
+                                      ItemsSource="{Binding CanvasOptions}" DisplayMemberPath="Name"
+                                      SelectedValuePath="Value" SelectedValue="{Binding Canvas}"
+                                      AutomationProperties.Name="Холст"
+                                      AutomationProperties.HelpText="Соотношение сторон и размер картинки. Не зависит от ориентации грифа. Стрелки вверх и вниз меняют выбор." />
 
-                    <Label Content="_Формат" Target="{Binding ElementName=FormatBox}" />
-                    <ComboBox x:Name="FormatBox"
-                              ItemsSource="{Binding FormatOptions}" DisplayMemberPath="Name"
-                              SelectedValuePath="Value" SelectedValue="{Binding Format}"
-                              AutomationProperties.Name="Формат файла"
-                              AutomationProperties.HelpText="GIF — основной формат, статический один кадр. PNG без потерь. JPG с высоким качеством." />
+                            <Label Content="Сти_ль изображения" Target="{Binding ElementName=StyleBox}" />
+                            <ComboBox x:Name="StyleBox"
+                                      ItemsSource="{Binding StyleOptions}" DisplayMemberPath="Name"
+                                      SelectedValuePath="Value" SelectedValue="{Binding Style}"
+                                      AutomationProperties.Name="Стиль изображения"
+                                      AutomationProperties.HelpText="Меняет только оформление, аппликатура и цифры пальцев остаются теми же." />
 
-                    <Label Content="_Имя файла" Target="{Binding ElementName=FileNameBox}" />
-                    <TextBox x:Name="FileNameBox"
-                             Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}"
-                             AutomationProperties.Name="Имя файла"
-                             AutomationProperties.HelpText="{Binding FileNameHelp}" />
-                    <TextBlock Style="{StaticResource HintText}">
-                        <Run Text="Будет сохранено как:" />
-                        <Run Text="{Binding EffectiveFileName, Mode=OneWay}" FontWeight="SemiBold" />
-                    </TextBlock>
+                            <Label Content="_Формат" Target="{Binding ElementName=FormatBox}" />
+                            <ComboBox x:Name="FormatBox" Margin="0,0,0,2"
+                                      ItemsSource="{Binding FormatOptions}" DisplayMemberPath="Name"
+                                      SelectedValuePath="Value" SelectedValue="{Binding Format}"
+                                      AutomationProperties.Name="Формат файла"
+                                      AutomationProperties.HelpText="GIF — основной формат, статический один кадр. PNG без потерь. JPG с высоким качеством." />
+                        </StackPanel>
+                    </Border>
 
-                    <Button Content="Выбор _пути…" Command="{Binding ChooseFolderCommand}"
-                            AutomationProperties.Name="Выбор пути"
-                            AutomationProperties.HelpText="Открывает системный диалог выбора папки для сохранения. Горячая клавиша Ctrl+O." />
-                    <Label Content="Текущий путь" Target="{Binding ElementName=FolderBox}" Padding="0,0,0,2" />
-                    <TextBox x:Name="FolderBox" Style="{StaticResource ReadOnlyText}"
-                             Text="{Binding OutputFolder, Mode=OneWay}"
-                             AutomationProperties.Name="Текущий путь"
-                             AutomationProperties.HelpText="Папка, куда сохраняется картинка. Изменить: кнопка Выбор пути." />
+                    <TextBlock Style="{StaticResource SectionCaption}" Text="ЭКСПОРТ" Margin="2,8,0,6" />
+                    <Border Style="{DynamicResource Card}">
+                        <StackPanel>
+                            <Label Content="_Имя файла" Target="{Binding ElementName=FileNameBox}" Padding="0,0,0,4" />
+                            <TextBox x:Name="FileNameBox"
+                                     Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="Имя файла"
+                                     AutomationProperties.HelpText="{Binding FileNameHelp}" />
+                            <TextBlock Style="{StaticResource HintText}">
+                                <Run Text="Будет сохранено как:" />
+                                <Run Text="{Binding EffectiveFileName, Mode=OneWay}" FontWeight="SemiBold"
+                                     Foreground="{DynamicResource Brush.Text}" />
+                            </TextBlock>
 
-                    <Button Content="_Сохранить" Command="{Binding SaveCommand}" FontWeight="SemiBold"
-                            AutomationProperties.Name="Сохранить"
-                            AutomationProperties.HelpText="Сохраняет картинку в выбранную папку. Горячая клавиша Ctrl+S. Результат будет объявлен." />
+                            <Button Content="Выбор _пути…" Command="{Binding ChooseFolderCommand}"
+                                    AutomationProperties.Name="Выбор пути"
+                                    AutomationProperties.HelpText="Открывает системный диалог выбора папки для сохранения. Горячая клавиша Ctrl+O." />
+                            <Label Content="Текущий путь" Target="{Binding ElementName=FolderBox}" Padding="0,0,0,4" />
+                            <TextBox x:Name="FolderBox" Style="{DynamicResource ReadOnlyText}"
+                                     Text="{Binding OutputFolder, Mode=OneWay}"
+                                     AutomationProperties.Name="Текущий путь"
+                                     AutomationProperties.HelpText="Папка, куда сохраняется картинка. Изменить: кнопка Выбор пути." />
 
-                    <TextBox Style="{StaticResource ReadOnlyText}" Text="{Binding StatusMessage, Mode=OneWay}"
-                             Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}"
-                             AutomationProperties.Name="Результат сохранения" />
-                    <TextBox Style="{StaticResource ReadOnlyText}" Text="{Binding ErrorSummary, Mode=OneWay}"
-                             Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}"
-                             AutomationProperties.Name="Сводка ошибок" />
-                    <TextBox Style="{StaticResource ReadOnlyText}" Text="{Binding WarningSummary, Mode=OneWay}"
-                             Visibility="{Binding HasWarnings, Converter={StaticResource BoolToVisibility}}"
-                             AutomationProperties.Name="Предупреждения" />
+                            <Button Content="_Сохранить" Command="{Binding SaveCommand}" Style="{DynamicResource AccentButton}"
+                                    AutomationProperties.Name="Сохранить"
+                                    AutomationProperties.HelpText="Сохраняет картинку в выбранную папку. Горячая клавиша Ctrl+S. Результат будет объявлен." />
+
+                            <TextBox Style="{DynamicResource ReadOnlyText}" Text="{Binding StatusMessage, Mode=OneWay}"
+                                     Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}"
+                                     AutomationProperties.Name="Результат сохранения" />
+                            <TextBox Style="{DynamicResource ReadOnlyText}" Text="{Binding ErrorSummary, Mode=OneWay}"
+                                     Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}"
+                                     AutomationProperties.Name="Сводка ошибок" />
+                            <TextBox Style="{DynamicResource ReadOnlyText}" Text="{Binding WarningSummary, Mode=OneWay}"
+                                     Visibility="{Binding HasWarnings, Converter={StaticResource BoolToVisibility}}"
+                                     AutomationProperties.Name="Предупреждения" />
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
 
             <!-- Превью: тот же bitmap, что уйдет в файл, просто масштабированный. -->
-            <Border Grid.Column="1" Margin="0,0,12,0" Background="#111111" BorderBrush="#444444" BorderThickness="1">
-                <Grid>
-                    <Image Source="{Binding Preview}" Stretch="Uniform" Margin="8"
-                           RenderOptions.BitmapScalingMode="HighQuality"
-                           AutomationProperties.Name="Превью картинки аккорда"
-                           AutomationProperties.HelpText="{Binding Description}" />
-                    <TextBlock Foreground="White" TextWrapping="Wrap" Margin="24"
-                               VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
-                               Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}"
-                               Text="Превью не обновлено: в аккорде есть ошибки. Список ошибок — в форме слева." />
-                </Grid>
+            <Border Grid.Column="1" Style="{DynamicResource Card}" Margin="0,0,12,10">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <TextBlock Text="Превью" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Border Style="{DynamicResource Chip}" HorizontalAlignment="Right">
+                            <TextBlock Style="{DynamicResource ChipText}" Text="{Binding PreviewCaption}" />
+                        </Border>
+                    </Grid>
+                    <Border Style="{DynamicResource PreviewInset}">
+                        <Grid>
+                            <Image Source="{Binding Preview}" Stretch="Uniform" Margin="10"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   AutomationProperties.Name="Превью картинки аккорда"
+                                   AutomationProperties.HelpText="{Binding Description}" />
+                            <Border Background="#E6101216" Padding="24,18" CornerRadius="10" Margin="24"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Foreground="White" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="360"
+                                           Text="Превью не обновлено: в аккорде есть ошибки. Список ошибок — в форме слева." />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DockPanel>
             </Border>
 
-            <DockPanel Grid.Column="2">
-                <Label DockPanel.Dock="Top" Content="_Описание аккорда" Target="{Binding ElementName=DescriptionBox}" />
-                <TextBox x:Name="DescriptionBox" Style="{StaticResource ReadOnlyText}"
-                         Text="{Binding Description, Mode=OneWay}"
-                         VerticalScrollBarVisibility="Auto"
-                         AutomationProperties.Name="Описание аккорда"
-                         AutomationProperties.HelpText="Полное текстовое описание картинки. Обновляется через долю секунды после ввода и не объявляется автоматически." />
-            </DockPanel>
+            <Border Grid.Column="2" Style="{DynamicResource Card}" Margin="0,0,0,10">
+                <DockPanel>
+                    <Label DockPanel.Dock="Top" Content="_Описание аккорда" Target="{Binding ElementName=DescriptionBox}"
+                           Padding="0,0,0,8" FontSize="15" />
+                    <TextBox x:Name="DescriptionBox" Style="{DynamicResource ReadOnlyText}"
+                             Text="{Binding Description, Mode=OneWay}"
+                             VerticalScrollBarVisibility="Auto"
+                             AutomationProperties.Name="Описание аккорда"
+                             AutomationProperties.HelpText="Полное текстовое описание картинки. Обновляется через долю секунды после ввода и не объявляется автоматически." />
+                </DockPanel>
+            </Border>
         </Grid>
     </DockPanel>
 </Window>
