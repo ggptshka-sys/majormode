@@ -52,6 +52,20 @@ if ($tags.Count -lt 2) {
 }
 
 $previous = $tags[1]
+
+# The public API caches releases/latest for about a minute; wait until it reports the new release.
+$repo = $env:GITHUB_REPOSITORY
+$deadline = (Get-Date).AddMinutes(5)
+do {
+    try {
+        $latest = (Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest" -UseBasicParsing `
+            -Headers @{ 'User-Agent' = 'MajorMode-e2e' }).tag_name
+    } catch { $latest = $null }
+    Write-Host "Public API latest: $latest"
+    if ($latest -eq "v$ExpectedVersion") { break }
+    Start-Sleep -Seconds 15
+} while ((Get-Date) -lt $deadline)
+if ($latest -ne "v$ExpectedVersion") { throw "Public API still reports $latest" }
 $dir = Join-Path (Get-Location) 'e2e'
 Remove-Item -Recurse -Force $dir -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $dir | Out-Null
