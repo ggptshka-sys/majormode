@@ -105,11 +105,11 @@ public static class ChordRenderer
         var outlineWidth = (float)(layout.Unit * 0.06);
         using var font = new SKFont(BoldTypeface.Value, (float)layout.MarkerFontSize) { Subpixel = true, Edging = SKFontEdging.Antialias };
 
-        var barre = chord.Barre;
-        if (barre is not null)
+        foreach (var barre in chord.Fingers.Where(f => f.IsAnyBarre))
         {
-            var rect = ToSk(layout.BarreRect(barre.Fret));
+            var rect = ToSk(layout.BarreRect(barre.Fret, barre.HighString, barre.LowString));
             var radius = rect.Width < rect.Height ? rect.Width / 2 : rect.Height / 2;
+            var color = MarkerPalette.FingerColor(barre.Finger);
             using (var outline = new SKPaint { IsAntialias = true, Color = style.MarkerOutline })
             {
                 var o = rect;
@@ -117,16 +117,16 @@ public static class ChordRenderer
                 canvas.DrawRoundRect(o, radius + outlineWidth, radius + outlineWidth, outline);
             }
 
-            using (var fill = new SKPaint { IsAntialias = true, Color = MarkerPalette.Finger1Red })
+            using (var fill = new SKPaint { IsAntialias = true, Color = color })
             {
                 canvas.DrawRoundRect(rect, radius, radius, fill);
             }
 
-            var label = BoardMapper.ToSk(layout.BarreLabelCenter(barre.Fret));
-            DrawCenteredText(canvas, "1", label, font, MarkerPalette.DigitColor(MarkerPalette.Finger1Red));
+            var label = BoardMapper.ToSk(layout.BarreLabelCenter(barre.Fret, barre.HighString, barre.LowString));
+            DrawCenteredText(canvas, barre.Finger.ToString(System.Globalization.CultureInfo.InvariantCulture), label, font, MarkerPalette.DigitColor(color));
         }
 
-        foreach (var f in chord.Fingers.Where(f => !f.IsBarre))
+        foreach (var f in chord.Fingers.Where(f => !f.IsAnyBarre))
         {
             // Приоритет: заглушенная струна показывается X, маркер пальца на ней не рисуется.
             if (chord.GetStringState(f.GuitarString) != StringState.Fretted)

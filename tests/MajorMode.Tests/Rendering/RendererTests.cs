@@ -124,6 +124,28 @@ public class RendererTests
         }
     }
 
+    [Theory]
+    [InlineData(FretboardOrientation.Vertical)]
+    [InlineData(FretboardOrientation.Horizontal)]
+    public void PartialBarre_IsBarInFingerColor_OnlyOnListedStrings(FretboardOrientation orientation)
+    {
+        var options = new RenderOptions(orientation, CanvasFormat.Landscape16x9, ImageStyle.Schematic);
+        using var image = Render(TestChords.APartialBarre, options);
+        var layout = LayoutFor(TestChords.APartialBarre, options);
+
+        foreach (var s in new[] { 4, 2 })
+        {
+            var c = layout.CellCenter(s, 2);
+            Assert.Equal(MarkerPalette.Finger3Yellow, Pixel(image, c.X, c.Y));
+        }
+
+        foreach (var s in new[] { 5, 1 })
+        {
+            var c = layout.CellCenter(s, 2);
+            Assert.NotEqual(MarkerPalette.Finger3Yellow, Pixel(image, c.X, c.Y));
+        }
+    }
+
     [Fact]
     public void FingerOnMutedString_IsNotDrawn_XIsShown()
     {

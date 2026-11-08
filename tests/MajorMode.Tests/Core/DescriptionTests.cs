@@ -29,6 +29,14 @@ public class DescriptionTests
     }
 
     [Fact]
+    public void PartialBarre_IsDescribedWithStrings()
+    {
+        var text = ChordAnalyzer.Analyze(TestChords.APartialBarre).Description;
+        Assert.Contains("Третий палец: 2 лад, малое баррэ, струны 4, 3, 2.", text);
+        Assert.Contains("Открытые струны: 5, 1.", text);
+    }
+
+    [Fact]
     public void NoFingers_IsDescribed()
     {
         var text = ChordAnalyzer.Analyze(TestChords.AllUnused).Description;

@@ -171,6 +171,103 @@ public class ParsingTests
         Assert.Equal([4], chord.MutedButFrettedStrings);
     }
 
+    [Theory]
+    [InlineData("4,3,2")]
+    [InlineData("2,3,4")]
+    [InlineData("4, 3, 2")]
+    [InlineData("4;3;2")]
+    [InlineData("4 3 2")]
+    public void PartialBarre_CoversListedAdjacentStrings(string strings)
+    {
+        var chord = TestChords.Parse(ChordInput.Create("A", "6", new FingerInput("2", strings)));
+
+        var f = chord.Fingers.Single();
+        Assert.True(f.IsPartialBarre);
+        Assert.False(f.IsBarre);
+        Assert.Null(chord.Barre);
+        Assert.Equal((4, 2), (f.HighString, f.LowString));
+        Assert.Equal([4, 3, 2], f.CoveredStrings);
+        Assert.Equal([5, 1], chord.OpenStrings);
+        Assert.Equal(StringState.Fretted, chord.GetStringState(3));
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void PartialBarre_IsAllowedForAnyFinger(int finger)
+    {
+        var fingers = new FingerInput[4];
+        for (var i = 0; i < 4; i++)
+        {
+            fingers[i] = i == finger - 1 ? new FingerInput("5", "3,2,1") : FingerInput.Unused;
+        }
+
+        var chord = TestChords.Parse(ChordInput.Create("X", "", fingers));
+        var f = chord.Fingers.Single();
+        Assert.Equal(finger, f.Finger);
+        Assert.True(f.IsPartialBarre);
+    }
+
+    [Fact]
+    public void AllSixStringsListedByFirstFinger_IsFullBarre()
+    {
+        var chord = TestChords.Parse(ChordInput.Create("X", "", new FingerInput("3", "6,5,4,3,2,1")));
+        Assert.True(chord.Fingers.Single().IsBarre);
+    }
+
+    [Fact]
+    public void SingleStringWithTrailingComma_IsOrdinaryFinger()
+    {
+        var chord = TestChords.Parse(ChordInput.Create("X", "", new FingerInput("3", "4,")));
+        Assert.Equal(FingerPlacement.OnString(1, 3, 4), chord.Fingers.Single());
+    }
+
+    [Theory]
+    [InlineData("4,2", "соседние")]
+    [InlineData("4,7", "от 1 до 6")]
+    [InlineData("4,x", "от 1 до 6")]
+    public void PartialBarre_InvalidList_IsErrorOnStringField(string strings, string expected)
+    {
+        var result = ChordParser.Parse(ChordInput.Create("X", "", new FingerInput("2", strings)));
+        Assert.False(result.IsValid);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(FieldId.Finger1String, error.Field);
+        Assert.Contains(expected, error.Text);
+    }
+
+    [Fact]
+    public void PartialBarre_WithZeroFret_IsError()
+    {
+        var result = ChordParser.Parse(ChordInput.Create("X", "", new FingerInput("0", "4,3,2")));
+        Assert.Equal(FieldId.Finger1Fret, Assert.Single(result.Errors).Field);
+    }
+
+    [Fact]
+    public void FingerAbovePartialBarre_IsOrdinary_SameFretOnCoveredString_IsWarning()
+    {
+        var above = ChordParser.Parse(ChordInput.Create("X", "", new FingerInput("5", "4,3,2"), new FingerInput("7", "3")));
+        Assert.True(above.IsValid);
+        Assert.Empty(above.Messages);
+
+        var same = ChordParser.Parse(ChordInput.Create("X", "", new FingerInput("5", "4,3,2"), new FingerInput("5", "3")));
+        Assert.True(same.IsValid);
+        var warning = Assert.Single(same.Warnings);
+        Assert.Equal(FieldId.Finger2Fret, warning.Field);
+        Assert.Contains("баррэ пальца 1", warning.Text);
+
+        var outside = ChordParser.Parse(ChordInput.Create("X", "", new FingerInput("5", "4,3,2"), new FingerInput("5", "1")));
+        Assert.Empty(outside.Messages);
+    }
+
+    [Fact]
+    public void PartialBarreOnMutedString_IsWarning()
+    {
+        var result = ChordParser.Parse(ChordInput.Create("X", "3", new FingerInput("2", "4,3,2")));
+        Assert.True(result.IsValid);
+        Assert.Contains(result.Warnings, w => w.Text.Contains("малое баррэ пальца 1"));
+    }
+
     [Fact]
     public void ChordName_IsNotValidatedHarmonically()
     {

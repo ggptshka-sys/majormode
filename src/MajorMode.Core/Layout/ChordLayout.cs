@@ -202,23 +202,28 @@ public sealed class ChordLayout
     }
 
     /// <summary>Полоса баррэ через все 6 струн на указанном ладу.</summary>
-    public RectD BarreRect(int fret)
+    public RectD BarreRect(int fret) => BarreRect(fret, ChordRules.StringCount, 1);
+
+    /// <summary>Полоса баррэ на струнах от <paramref name="highString"/> до <paramref name="lowString"/>; не заходит на соседние струны.</summary>
+    public RectD BarreRect(int fret, int highString, int lowString)
     {
-        var center = CellCenter(1, fret);
+        var center = CellCenter(lowString, fret);
         var halfT = BarreThickness / 2;
         var overhang = MarkerRadius * 1.1;
         if (Orientation == FretboardOrientation.Vertical)
         {
-            return RectD.FromEdges(StringOffset(6) - overhang, center.Y - halfT, StringOffset(1) + overhang, center.Y + halfT);
+            return RectD.FromEdges(StringOffset(highString) - overhang, center.Y - halfT, StringOffset(lowString) + overhang, center.Y + halfT);
         }
 
-        return RectD.FromEdges(center.X - halfT, StringOffset(1) - overhang, center.X + halfT, StringOffset(6) + overhang);
+        return RectD.FromEdges(center.X - halfT, StringOffset(lowString) - overhang, center.X + halfT, StringOffset(highString) + overhang);
     }
 
     /// <summary>Точка привязки цифры баррэ — середина полосы.</summary>
-    public PointD BarreLabelCenter(int fret)
+    public PointD BarreLabelCenter(int fret) => BarreLabelCenter(fret, ChordRules.StringCount, 1);
+
+    public PointD BarreLabelCenter(int fret, int highString, int lowString)
     {
-        var r = BarreRect(fret);
+        var r = BarreRect(fret, highString, lowString);
         return new PointD(r.CenterX, r.CenterY);
     }
 

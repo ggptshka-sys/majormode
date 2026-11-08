@@ -1,9 +1,8 @@
-using MajorMode.Core.Model;
 using MajorMode.Core.Parsing;
 
 namespace MajorMode.App.ViewModels;
 
-/// <summary>Поля одного пальца: лад и струна, с текстом ошибок и подсказками для UIA.</summary>
+/// <summary>Поля одного пальца: лад и струна, с короткими именами и текстом ошибок для UIA.</summary>
 public sealed class FingerRowViewModel(int number, Action onChanged) : ObservableObject
 {
     private string _fret = "0";
@@ -13,9 +12,9 @@ public sealed class FingerRowViewModel(int number, Action onChanged) : Observabl
 
     public int Number { get; } = number;
 
-    public string FretLabel => $"Палец {Number}: лад";
+    public string FretLabel => $"{Number} палец лад";
 
-    public string StringLabel => $"Палец {Number}: струна";
+    public string StringLabel => $"{Number} палец струна";
 
     public string Fret
     {
@@ -44,33 +43,14 @@ public sealed class FingerRowViewModel(int number, Action onChanged) : Observabl
     public string FretError
     {
         get => _fretError;
-        private set
-        {
-            if (Set(ref _fretError, value))
-            {
-                OnPropertyChanged(nameof(FretHelp));
-            }
-        }
+        private set => Set(ref _fretError, value);
     }
 
     public string StringError
     {
         get => _stringError;
-        private set
-        {
-            if (Set(ref _stringError, value))
-            {
-                OnPropertyChanged(nameof(StringHelp));
-            }
-        }
+        private set => Set(ref _stringError, value);
     }
-
-    public string FretHelp => Compose(
-        $"Лад от 1 до {ChordRules.DefaultMaxFret}. {ChordParser.SkipFingerHint}", FretError);
-
-    public string StringHelp => Compose(
-        $"Струна от 1 до 6" + (Number == 1 ? ", или латинская B для баррэ на все струны." : ".") + $" {ChordParser.SkipFingerHint}",
-        StringError);
 
     public FingerInput ToInput() => new(Fret, GuitarString);
 
@@ -79,7 +59,4 @@ public sealed class FingerRowViewModel(int number, Action onChanged) : Observabl
         FretError = fretError;
         StringError = stringError;
     }
-
-    internal static string Compose(string help, string error) =>
-        string.IsNullOrEmpty(error) ? help : $"Ошибка: {error} Подсказка: {help}";
 }

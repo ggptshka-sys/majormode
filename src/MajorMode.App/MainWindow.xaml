@@ -40,10 +40,9 @@
                             <Label Content="_Название аккорда" Target="{Binding ElementName=ChordNameBox}" Padding="0,0,0,4" />
                             <TextBox x:Name="ChordNameBox" FontSize="17" FontWeight="SemiBold"
                                      Text="{Binding ChordName, UpdateSourceTrigger=PropertyChanged}"
-                                     AutomationProperties.Name="Название аккорда"
-                                     AutomationProperties.HelpText="{Binding ChordNameHelp}" />
+                                     AutomationProperties.Name="Имя аккорда" />
                             <TextBlock Style="{StaticResource HintText}" Margin="0,6,0,0"
-                                       Text="Чтобы пропустить палец, введите 0 в оба поля. Для баррэ первым пальцем введите латинскую B в поле «струна»." />
+                                       Text="Пропустить палец: 0 в оба поля. Баррэ на все струны: B у 1 пальца. Малое баррэ: струны через запятую, например 4,3,2." />
                         </StackPanel>
                     </Border>
 
@@ -63,15 +62,15 @@
                                     <TextBox x:Name="Finger1Fret" MaxLength="3"
                                              Text="{Binding Fret, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.Name="{Binding FretLabel}"
-                                             AutomationProperties.HelpText="{Binding FretHelp}"
+                                             AutomationProperties.HelpText="{Binding FretError}"
                                              AutomationProperties.ItemStatus="{Binding FretError}" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
-                                    <Label Content="Струна или B" Target="{Binding ElementName=Finger1String}" />
-                                    <TextBox x:Name="Finger1String" MaxLength="2"
+                                    <Label Content="Струна" Target="{Binding ElementName=Finger1String}" />
+                                    <TextBox x:Name="Finger1String" MaxLength="16"
                                              Text="{Binding GuitarString, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.Name="{Binding StringLabel}"
-                                             AutomationProperties.HelpText="{Binding StringHelp}"
+                                             AutomationProperties.HelpText="{Binding StringError}"
                                              AutomationProperties.ItemStatus="{Binding StringError}" />
                                 </StackPanel>
                             </Grid>
@@ -94,15 +93,15 @@
                                     <TextBox x:Name="Finger2Fret" MaxLength="3"
                                              Text="{Binding Fret, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.Name="{Binding FretLabel}"
-                                             AutomationProperties.HelpText="{Binding FretHelp}"
+                                             AutomationProperties.HelpText="{Binding FretError}"
                                              AutomationProperties.ItemStatus="{Binding FretError}" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <Label Content="Струна" Target="{Binding ElementName=Finger2String}" />
-                                    <TextBox x:Name="Finger2String" MaxLength="2"
+                                    <TextBox x:Name="Finger2String" MaxLength="16"
                                              Text="{Binding GuitarString, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.Name="{Binding StringLabel}"
-                                             AutomationProperties.HelpText="{Binding StringHelp}"
+                                             AutomationProperties.HelpText="{Binding StringError}"
                                              AutomationProperties.ItemStatus="{Binding StringError}" />
                                 </StackPanel>
                             </Grid>
@@ -125,15 +124,15 @@
                                     <TextBox x:Name="Finger3Fret" MaxLength="3"
                                              Text="{Binding Fret, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.Name="{Binding FretLabel}"
-                                             AutomationProperties.HelpText="{Binding FretHelp}"
+                                             AutomationProperties.HelpText="{Binding FretError}"
                                              AutomationProperties.ItemStatus="{Binding FretError}" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <Label Content="Струна" Target="{Binding ElementName=Finger3String}" />
-                                    <TextBox x:Name="Finger3String" MaxLength="2"
+                                    <TextBox x:Name="Finger3String" MaxLength="16"
                                              Text="{Binding GuitarString, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.Name="{Binding StringLabel}"
-                                             AutomationProperties.HelpText="{Binding StringHelp}"
+                                             AutomationProperties.HelpText="{Binding StringError}"
                                              AutomationProperties.ItemStatus="{Binding StringError}" />
                                 </StackPanel>
                             </Grid>
@@ -156,15 +155,15 @@
                                     <TextBox x:Name="Finger4Fret" MaxLength="3"
                                              Text="{Binding Fret, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.Name="{Binding FretLabel}"
-                                             AutomationProperties.HelpText="{Binding FretHelp}"
+                                             AutomationProperties.HelpText="{Binding FretError}"
                                              AutomationProperties.ItemStatus="{Binding FretError}" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <Label Content="Струна" Target="{Binding ElementName=Finger4String}" />
-                                    <TextBox x:Name="Finger4String" MaxLength="2"
+                                    <TextBox x:Name="Finger4String" MaxLength="16"
                                              Text="{Binding GuitarString, UpdateSourceTrigger=PropertyChanged}"
                                              AutomationProperties.Name="{Binding StringLabel}"
-                                             AutomationProperties.HelpText="{Binding StringHelp}"
+                                             AutomationProperties.HelpText="{Binding StringError}"
                                              AutomationProperties.ItemStatus="{Binding StringError}" />
                                 </StackPanel>
                             </Grid>
@@ -179,7 +178,7 @@
                             <TextBox x:Name="MutedBox"
                                      Text="{Binding MutedStrings, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="Заглушенные струны"
-                                     AutomationProperties.HelpText="{Binding MutedHelp}"
+                                     AutomationProperties.HelpText="{Binding MutedError}"
                                      AutomationProperties.ItemStatus="{Binding MutedError}" />
                             <TextBlock Style="{StaticResource HintText}" Text="{x:Static parsing:MutedStringsParser.HelpText}" />
                             <TextBlock Style="{StaticResource ErrorText}" Text="{Binding MutedError}" />
@@ -197,13 +196,11 @@
                                         <RadioButton Content="_Вертикально" GroupName="Orientation" Margin="0,0,2,0"
                                                      IsChecked="{Binding IsVertical}"
                                                      GotKeyboardFocus="RadioButton_GotKeyboardFocus"
-                                                     AutomationProperties.Name="Ориентация грифа: вертикально"
-                                                     AutomationProperties.HelpText="Слева 6 струна, справа 1. Лады растут сверху вниз. Стрелки переключают ориентацию." />
+                                                     AutomationProperties.Name="Вертикально" />
                                         <RadioButton Content="_Горизонтально" GroupName="Orientation" Margin="2,0,0,0"
                                                      IsChecked="{Binding IsHorizontal}"
                                                      GotKeyboardFocus="RadioButton_GotKeyboardFocus"
-                                                     AutomationProperties.Name="Ориентация грифа: горизонтально"
-                                                     AutomationProperties.HelpText="Снизу 6 струна, сверху 1. Лады растут слева направо. Стрелки переключают ориентацию." />
+                                                     AutomationProperties.Name="Горизонтально" />
                                     </UniformGrid>
                                 </Border>
                             </GroupBox>
@@ -212,22 +209,19 @@
                             <ComboBox x:Name="CanvasBox"
                                       ItemsSource="{Binding CanvasOptions}" DisplayMemberPath="Name"
                                       SelectedValuePath="Value" SelectedValue="{Binding Canvas}"
-                                      AutomationProperties.Name="Холст"
-                                      AutomationProperties.HelpText="Соотношение сторон и размер картинки. Не зависит от ориентации грифа. Стрелки вверх и вниз меняют выбор." />
+                                      AutomationProperties.Name="Холст" />
 
                             <Label Content="Сти_ль изображения" Target="{Binding ElementName=StyleBox}" />
                             <ComboBox x:Name="StyleBox"
                                       ItemsSource="{Binding StyleOptions}" DisplayMemberPath="Name"
                                       SelectedValuePath="Value" SelectedValue="{Binding Style}"
-                                      AutomationProperties.Name="Стиль изображения"
-                                      AutomationProperties.HelpText="Меняет только оформление, аппликатура и цифры пальцев остаются теми же." />
+                                      AutomationProperties.Name="Стиль" />
 
                             <Label Content="_Формат" Target="{Binding ElementName=FormatBox}" />
                             <ComboBox x:Name="FormatBox" Margin="0,0,0,2"
                                       ItemsSource="{Binding FormatOptions}" DisplayMemberPath="Name"
                                       SelectedValuePath="Value" SelectedValue="{Binding Format}"
-                                      AutomationProperties.Name="Формат файла"
-                                      AutomationProperties.HelpText="GIF — основной формат, статический один кадр. PNG без потерь. JPG с высоким качеством." />
+                                      AutomationProperties.Name="Формат" />
                         </StackPanel>
                     </Border>
 
@@ -237,8 +231,7 @@
                             <Label Content="_Имя файла" Target="{Binding ElementName=FileNameBox}" Padding="0,0,0,4" />
                             <TextBox x:Name="FileNameBox"
                                      Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}"
-                                     AutomationProperties.Name="Имя файла"
-                                     AutomationProperties.HelpText="{Binding FileNameHelp}" />
+                                     AutomationProperties.Name="Имя файла" />
                             <TextBlock Style="{StaticResource HintText}">
                                 <Run Text="Будет сохранено как:" />
                                 <Run Text="{Binding EffectiveFileName, Mode=OneWay}" FontWeight="SemiBold"
@@ -253,24 +246,22 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBox x:Name="FolderBox" Style="{DynamicResource ReadOnlyText}"
                                          Text="{Binding OutputFolder, Mode=OneWay}"
-                                         AutomationProperties.Name="Текущий путь"
-                                         AutomationProperties.HelpText="Папка, куда сохраняется картинка. Изменить: кнопка Выбор пути, она следующая по Tab." />
+                                         AutomationProperties.Name="Текущий путь" />
                                 <Button Grid.Column="1" Content="Выбор _пути…" Command="{Binding ChooseFolderCommand}"
                                         Margin="8,0,0,4" VerticalAlignment="Top" MinHeight="38"
-                                        AutomationProperties.Name="Выбор пути"
-                                        AutomationProperties.HelpText="Открывает системный диалог выбора папки для сохранения. Горячая клавиша Ctrl+O." />
+                                        AutomationProperties.Name="Выбор пути" />
                             </Grid>
 
                             <Button x:Name="SaveButton" Content="_Сохранить" Command="{Binding SaveCommand}" Style="{DynamicResource AccentButton}"
-                                    AutomationProperties.Name="Сохранить"
-                                    AutomationProperties.HelpText="Сохраняет картинку в выбранную папку. Горячая клавиша Ctrl+S. Результат будет объявлен." />
+                                    AutomationProperties.Name="Сохранить" />
 
                             <TextBox Style="{DynamicResource ReadOnlyText}" Text="{Binding StatusMessage, Mode=OneWay}"
                                      Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}"
                                      AutomationProperties.Name="Результат сохранения" />
                             <TextBox Style="{DynamicResource ReadOnlyText}" Text="{Binding ErrorSummary, Mode=OneWay}"
                                      Visibility="{Binding HasErrors, Converter={StaticResource BoolToVisibility}}"
-                                     AutomationProperties.Name="Сводка ошибок" />                        </StackPanel>
+                                     AutomationProperties.Name="Сводка ошибок" />
+                        </StackPanel>
                     </Border>
                 </StackPanel>
             </ScrollViewer>
@@ -313,8 +304,7 @@
                     <TextBox x:Name="DescriptionBox" Style="{DynamicResource ReadOnlyText}"
                              Text="{Binding Description, Mode=OneWay}"
                              VerticalScrollBarVisibility="Auto"
-                             AutomationProperties.Name="Описание аккорда"
-                             AutomationProperties.HelpText="Полное текстовое описание картинки. Обновляется через долю секунды после ввода и не объявляется автоматически." />
+                             AutomationProperties.Name="Описание аккорда" />
                 </DockPanel>
             </Border>
         </Grid>
@@ -355,8 +345,7 @@
             <StatusBarItem DockPanel.Dock="Left" Focusable="False">
                 <Button x:Name="ShareButton" Style="{DynamicResource LinkButton}"
                         Command="{Binding ShareCommand}"
-                        AutomationProperties.Name="Поделиться"
-                        AutomationProperties.HelpText="Открывает страницу проекта на GitHub в браузере и копирует ссылку на нее в буфер обмена. Alt+Д.">
+                        AutomationProperties.Name="Поделиться">
                     <AccessText Text="По_делиться" TextDecorations="Underline" />
                 </Button>
             </StatusBarItem>
@@ -371,8 +360,7 @@
             <StatusBarItem DockPanel.Dock="Right" Focusable="False">
                 <Button x:Name="CheckUpdatesButton" Style="{DynamicResource LinkButton}"
                         Command="{Binding CheckUpdatesCommand}"
-                        AutomationProperties.Name="Проверить обновления"
-                        AutomationProperties.HelpText="Сверяет версию с последней на GitHub. Если есть новая, спросит подтверждение, скачает ее и перезапустит программу. Alt+Б.">
+                        AutomationProperties.Name="Проверить обновления">
                     <AccessText Text="Проверить о_бновления" TextDecorations="Underline" />
                 </Button>
             </StatusBarItem>

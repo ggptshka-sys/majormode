@@ -22,6 +22,10 @@ public static class TestChords
     public static ChordInput Barre5 => ChordInput.Create("Barre 5", "",
         new("5", "B"), new("7", "5"), new("7", "4"), new("6", "3"));
 
+    /// <summary>A: малое баррэ третьим пальцем на 2 ладу, струны 4-2; 6 заглушена.</summary>
+    public static ChordInput APartialBarre => ChordInput.Create("A", "6",
+        new("0", "0"), new("0", "0"), new("2", "4,3,2"), new("0", "0"));
+
     public static ChordInput AllUnused => ChordInput.Create("Пусто", "");
 
     public static ChordAnalysis Analyze(ChordInput input) => ChordAnalyzer.Analyze(input);

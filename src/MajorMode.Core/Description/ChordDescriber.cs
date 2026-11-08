@@ -26,8 +26,8 @@ public static class ChordDescriber
         foreach (var f in chord.Fingers)
         {
             sb.Append(' ');
-            sb.Append(f.IsBarre
-                ? $"Баррэ первым пальцем на {f.Fret} ладу, все струны."
+            sb.Append(f.IsBarre ? $"Баррэ первым пальцем на {f.Fret} ладу, все струны."
+                : f.IsPartialBarre ? $"{Ordinals[f.Finger - 1]} палец: {f.Fret} лад, малое баррэ, струны {string.Join(", ", f.CoveredStrings)}."
                 : $"{Ordinals[f.Finger - 1]} палец: {f.Fret} лад, {f.GuitarString} струна.");
         }
 

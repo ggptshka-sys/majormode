@@ -143,12 +143,9 @@ public sealed class MainViewModel : ObservableObject
             }
 
             OnPropertyChanged(nameof(EffectiveFileName));
-            OnPropertyChanged(nameof(FileNameHelp));
             OnInputChanged();
         }
     }
-
-    public string ChordNameHelp => "Свободный текст, например C, Dm, F#m7, Bb. Пишется крупно над грифом и используется как имя файла по умолчанию.";
 
     public string MutedStrings
     {
@@ -165,16 +162,8 @@ public sealed class MainViewModel : ObservableObject
     public string MutedError
     {
         get => _mutedError;
-        private set
-        {
-            if (Set(ref _mutedError, value))
-            {
-                OnPropertyChanged(nameof(MutedHelp));
-            }
-        }
+        private set => Set(ref _mutedError, value);
     }
-
-    public string MutedHelp => FingerRowViewModel.Compose(MutedStringsParser.HelpText, MutedError);
 
     public string GeneralError
     {
@@ -239,7 +228,6 @@ public sealed class MainViewModel : ObservableObject
             if (Set(ref _format, value))
             {
                 OnPropertyChanged(nameof(EffectiveFileName));
-                OnPropertyChanged(nameof(FileNameHelp));
                 OnPropertyChanged(nameof(PreviewCaption));
                 MarkChanged();
             }
@@ -269,7 +257,6 @@ public sealed class MainViewModel : ObservableObject
 
             _fileNameEdited = value.Trim().Length > 0 && value != AutoFileName;
             OnPropertyChanged(nameof(EffectiveFileName));
-            OnPropertyChanged(nameof(FileNameHelp));
             MarkChanged();
         }
     }
@@ -279,9 +266,6 @@ public sealed class MainViewModel : ObservableObject
     private string FileNameSource => string.IsNullOrWhiteSpace(FileName) ? ChordName : FileName;
 
     public string EffectiveFileName => FileNameSanitizer.BuildFileName(FileNameSource, Format);
-
-    public string FileNameHelp =>
-        $"Пусто: имя по названию аккорда. Недопустимые символы заменяются на подчеркивание. Будет сохранено как {EffectiveFileName}.";
 
     public string OutputFolder
     {
